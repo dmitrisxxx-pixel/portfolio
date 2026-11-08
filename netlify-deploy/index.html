@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+        <!-- Настройки для поиска Google и безопасности от Клода -->
+        <title>Дмитрий Эполетов — Фронтенд-разработчик | Санкт-Петербург</title>
+        <meta name="description" content="Сайт-визитка начинающего веб-разработчика Дмитрия Эполетова из Санкт-Петербурга. Навыки: HTML, CSS, JavaScript, Git. Открыт к первым проектам.">
+        <meta http-equiv="X-Content-Type-Options" content="nosniff">
+        <meta name="referrer" content="strict-origin-when-cross-origin">
+        <!-- <meta name="google-site-verification" content="КОД_ИЗ_SEARCH_CONSOLE" /> -->
+    
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; frame-src 'self'; img-src 'self' data: blob:; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline'; connect-src 'self'; upgrade-insecure-requests">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #100c1c;
+      --bg-soft: #1a1430;
+      --card: rgba(28, 20, 52, 0.74);
+      --line: rgba(196, 181, 253, 0.18);
+      --text: #f4f0ff;
+      --muted: #b7aec9;
+      --accent: #c4b5fd;
+      --accent-2: #2ee6c7;
+      --btn: #2ee6c7;
+      --btn-text: #06241e;
+      --shadow: 0 30px 80px rgba(8, 4, 24, 0.45);
+    }
+  /* Переменные для светлой темы, которые включатся при клике */
+  [data-theme="light"] {
+    --bg: #f4f0ff;
+    --bg-soft: #e8e2f5;
+    --card: rgba(240, 235, 250, 0.74);
+    --line: rgba(16, 12, 28, 0.1);
+    --text: #100c1c;
+    --muted: #5a5266;
+    --accent: #2cc6c7;
+    --accent-2: #c4b5fd;
+    --btn-text: #ffffff;
+    --shadow: 0 30px 40px rgba(16, 12, 28, 0.05);
+  }
+    /* Стили для кнопки переключения темы */
+    .theme-toggle-btn {
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+    background-color: var(--bg-soft);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+
+  .theme-toggle-btn:hover {
+    transform: scale(1.03);
+  background-color: var(--card)
+}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Manrope", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 8% -10%, rgba(139, 92, 246, 0.32), transparent 60%),
+        radial-gradient(700px 480px at 100% 0%, rgba(46, 230, 199, 0.16), transparent 55%),
+        linear-gradient(180deg, #1a1233 0%, var(--bg) 48%, #0a0814 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.035) 0.6px, transparent 0.6px);
+      background-size: 3px 3px;
+      opacity: 0.45;
+    }
+
+    .wrap {
+      position: relative;
+      width: min(1080px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 36px 0 56px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    .mark {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(46, 230, 199, 0.16);
+    }
+
+    .status {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--accent-2);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.4fr 0.8fr;
+      gap: 28px;
+      align-items: stretch;
+    }
+
+    .intro,
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .intro {
+      padding: 48px 48px 40px;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .name {
+      font-family: "Unbounded", sans-serif;
+      font-weight: 700;
+      font-size: clamp(40px, 6vw, 72px);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      max-width: 14ch;
+      margin-bottom: 36px;
+    }
+
+    .name span {
+      color: var(--accent-2);
+    }
+
+    .headline {
+      font-family: "Unbounded", sans-serif;
+      font-weight: 700;
+      font-size: clamp(32px, 4vw, 48px);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      max-width: 14ch;
+    }
+
+    .headline span {
+      color: var(--accent);
+    }
+
+    .lead {
+      margin-top: 22px;
+      max-width: 46ch;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.65;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      border-radius: 999px;
+      padding: 13px 20px;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .btn-primary {
+      background: var(--btn);
+      color: var(--btn-text);
+    }
+
+    .btn-primary:hover {
+      background: #7af6e2;
+    }
+
+    .btn-ghost {
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .panel {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        linear-gradient(180deg, rgba(139, 92, 246, 0.22), transparent 42%),
+        var(--card);
+    }
+
+    .panel p {
+      color: var(--muted);
+      line-height: 1.6;
+      margin-top: 10px;
+    }
+
+    .stat {
+      margin-top: 28px;
+    }
+
+    .stat strong {
+      display: block;
+      font-family: "Unbounded", sans-serif;
+      font-size: 34px;
+      margin-bottom: 4px;
+    }
+
+    .skills {
+      margin-top: 28px;
+      padding: 36px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    h2 {
+      font-family: "Unbounded", sans-serif;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+    }
+
+    .section-head span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .skills ul,
+    .projects ul {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .skills li {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 20px;
+      padding: 18px 18px 16px;
+      min-height: 132px;
+    }
+
+    .skill-name {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: rgba(167, 139, 250, 0.18);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .skills li p,
+    .project p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .projects {
+      margin-top: 28px;
+      padding: 36px;
+    }
+
+    .project {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      min-height: 220px;
+      padding: 22px 20px 18px;
+      background:
+        linear-gradient(160deg, rgba(46, 230, 199, 0.12), transparent 42%),
+        rgba(255, 255, 255, 0.03);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .project:nth-child(2) {
+      background:
+        linear-gradient(160deg, rgba(167, 139, 250, 0.22), transparent 46%),
+        rgba(255, 255, 255, 0.03);
+    }
+
+    .project:nth-child(3) {
+      background:
+        linear-gradient(200deg, rgba(46, 230, 199, 0.08), rgba(139, 92, 246, 0.18) 70%),
+        rgba(255, 255, 255, 0.03);
+    }
+
+    .project-label {
+      align-self: flex-start;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--btn-text);
+      background: var(--accent-2);
+    }
+
+    .project h3 {
+      font-family: "Unbounded", sans-serif;
+      font-size: 22px;
+      letter-spacing: -0.03em;
+      margin: 28px 0 8px;
+    }
+
+    footer {
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    footer a {
+      color: var(--accent-2);
+      text-decoration: none;
+    }
+
+    @media (max-width: 860px) {
+      .hero,
+      .skills ul,
+      .projects ul {
+        grid-template-columns: 1fr;
+      }
+
+      .intro {
+        padding: 32px 24px;
+      }
+
+      header,
+      footer,
+      .section-head {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+    /* Оболочка телефона: края видны, пропорции фиксированы (без растягивания) */
+    .app-shell {
+      width: min(100%, 360px);
+      margin: 0 auto;
+      padding: 11px;
+      border-radius: 40px;
+      background: linear-gradient(145deg, #343044, #09080e 45%, #4a4655);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, .35);
+      border: 2px solid #6d6878;
+      box-sizing: border-box;
+    }
+    [data-theme="light"] .app-shell {
+      background: linear-gradient(145deg, #ece8f8, #d8d2ea 45%, #cfc8e4);
+      border-color: #b8b0d0;
+      box-shadow: 0 18px 40px rgba(16, 12, 28, .12);
+    }
+    .app-shell-groomly {
+      background: linear-gradient(145deg, #3a2a24, #14110f 45%, #2a3840);
+      border-color: #6a5a52;
+    }
+    [data-theme="light"] .app-shell-groomly {
+      background: linear-gradient(145deg, #ffe8dc, #e8f6fd 55%, #d9eef8);
+      border-color: #c9b8ae;
+    }
+    .app-shell-agro {
+      background: linear-gradient(145deg, #243328, #101712 45%, #1c2a22);
+      border-color: #3d5344;
+    }
+    [data-theme="light"] .app-shell-agro {
+      background: linear-gradient(145deg, #e8f0e4, #f0ebe3 55%, #dce6d6);
+      border-color: #b7c4b0;
+    }
+    .phone-notch {
+      width: 34%;
+      height: 16px;
+      margin: 2px auto 10px;
+      border-radius: 20px;
+      background: #050507;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+    }
+    .phone-screen {
+      position: relative;
+      overflow: hidden;
+      border-radius: 30px;
+      background: #f7f5f2;
+      /* Высота только от ширины — так экран не растягивается */
+      width: 100%;
+      aspect-ratio: 9 / 19.5;
+      height: auto;
+      min-height: 0;
+      max-height: none;
+      padding: 0;
+    }
+    [data-theme="dark"] .phone-screen { background: #1a212c; }
+    .proto-frame {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #f7f5f2;
+      border-radius: 30px;
+      /* Запрет неравномерного масштаба в части мобильных WebView */
+      transform: none;
+    }
+    .demo-open {
+      display: inline-flex;
+      margin-top: 14px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent-2);
+      text-decoration: none;
+    }
+    .demo-open:hover { text-decoration: underline; }
+
+    @media (max-width: 480px) {
+      .app-shell {
+        width: min(100%, 320px);
+        padding: 9px;
+        border-radius: 34px;
+      }
+      .phone-screen, .proto-frame { border-radius: 26px; }
+      .phone-notch { height: 14px; margin-bottom: 8px; }
+    }
+
+    @media (max-width: 860px) {
+      .hero, .skills ul { grid-template-columns: 1fr; }
+      .intro { padding: 32px 24px; }
+      .skills, .projects { padding: 24px; }
+      .section-head { align-items: flex-start; flex-direction: column; }
+    }
+    @media (max-width: 480px) {
+      .wrap { width: min(100% - 20px, 1080px); padding-top: 22px; }
+      .name { font-size: 34px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+
+    /* Карточки проектов с прототипами */
+    .projects ul { grid-template-columns: 1fr; }
+    .project { display: block; min-height: 0; }
+    .project-app { margin-top: 24px; padding-top: 22px; border-top: 1px solid var(--line); }
+    .project-stub { min-height: 160px; }
+
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1 class="name">Привет, я <span>Дмитрий Эполетов</span></h1>
+
+    <header>
+      <div class="mark"><span class="dot"></span> Сайт-визитка</div>
+      <div class="status">Открыт к первым проектам</div>
+      <button id="theme-toggle" class="theme-toggle-btn" aria-label="Переключить тему">🌙 Режим</button>
+
+    </header>
+
+    <section class="hero">
+      <article class="intro">
+        <p class="eyebrow">Начинающий программист</p>
+        <p class="headline">Привет, я учусь <span>создавать</span> полезные вещи в вебе.</p>
+        <p class="lead">
+          Делаю аккуратные страницы, разбираюсь в основах фронтенда и каждый день
+          добавляю к навыкам что-то новое. Эта страница — моя короткая визитка.
+        </p>
+        <div class="actions">
+            <a class="btn btn-primary" id="view-skills-btn" href="#skills">Смотреть навыки</a>
+
+          <a class="btn btn-ghost" href="#" id="secure-write-btn">Написать мне</a>
+
+
+        </div>
+      </article>
+
+      <aside class="panel">
+        <div>
+          <p class="eyebrow">Сейчас в фокусе</p>
+          <h2>Чистый код и понятный интерфейс</h2>
+          <p>Учусь писать разметку, стили и небольшие скрипты так, чтобы результат было приятно открывать.</p>
+        </div>
+        <div class="stat">
+          <strong>01</strong>
+          <p>Первый самостоятельный сайт — уже здесь.</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="skills" id="skills">
+      <div class="section-head">
+        <h2>Навыки</h2>
+        <span>То, с чем уже работаю уверенно</span>
+      </div>
+      <ul>
+        <li>
+          <div class="skill-name"><span class="badge">01</span> HTML</div>
+          <p>Семантическая разметка, формы, доступная структура страницы.</p>
+        </li>
+        <li>
+          <div class="skill-name"><span class="badge">02</span> CSS</div>
+          <p>Сетки, адаптив, типографика и спокойные визуальные акценты.</p>
+        </li>
+        <li>
+          <div class="skill-name"><span class="badge">03</span> JavaScript</div>
+          <p>Базовая логика, события и небольшие интерактивные элементы.</p>
+        </li>
+        <li>
+          <div class="skill-name"><span class="badge">04</span> Git</div>
+          <p>Коммиты, ветки и аккуратная история изменений в проекте.</p>
+        </li>
+        <li>
+          <div class="skill-name"><span class="badge">05</span> Адаптив</div>
+          <p>Страницы, которые читаются и на большом экране, и на телефоне.</p>
+        </li>
+        <li>
+          <div class="skill-name"><span class="badge">06</span> Обучение</div>
+          <p>Разбираю документацию, повторяю примеры и довожу задачи до конца.</p>
+        </li>
+      </ul>
+    </section>
+
+    <section class="projects" id="projects">
+      <div class="section-head">
+        <h2>Мои проекты</h2>
+        <span>Интерактивные прототипы</span>
+      </div>
+      <ul>
+        <li class="project">
+          <span class="project-label">Интерактивный прототип</span>
+          <h3>Проект 01 — «Groomly»</h3>
+          <p>Современное мобильное приложение для груминг-салонов. Запись к мастерам, выбор услуг, профили питомцев, оплата и чат.</p>
+          <div class="project-app">
+            <div class="app-shell app-shell-groomly" aria-label="Прототип Groomly">
+              <div class="phone-notch" aria-hidden="true"></div>
+              <div class="phone-screen">
+                <iframe
+                  class="proto-frame"
+                  src="Groomly/index.html?embed=1"
+                  title="Groomly — интерактивный прототип"
+                  allow="fullscreen"
+                  loading="eager"
+                ></iframe>
+              </div>
+            </div>
+            <a class="demo-open" href="Groomly/index.html">Открыть Groomly на весь экран →</a>
+          </div>
+        </li>
+        <li class="project">
+          <span class="project-label">Интерактивный прототип</span>
+          <h3>Проект 02 — «AgroSezon»</h3>
+          <p>Сезонный календарь овощей, зелени, фруктов и ягод по странам и климатическим зонам Европы, Северной Африки и Азии.</p>
+          <div class="project-app">
+            <div class="app-shell app-shell-agro" aria-label="Прототип AgroSezon">
+              <div class="phone-notch" aria-hidden="true"></div>
+              <div class="phone-screen">
+                <iframe
+                  class="proto-frame"
+                  src="AgroSezon/index.html?embed=1"
+                  title="AgroSezon — интерактивный прототип"
+                  allow="fullscreen"
+                  loading="eager"
+                ></iframe>
+              </div>
+            </div>
+            <a class="demo-open" href="AgroSezon/index.html">Открыть AgroSezon на весь экран →</a>
+          </div>
+        </li>
+        <li class="project project-stub">
+          <span class="project-label">Скоро</span>
+          <div>
+            <h3>Проект 03</h3>
+            <p>Ещё одно место под будущий проект, когда будет что показать.</p>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <footer>
+      <span>Санкт-Петербург · удалённо</span> ·
+      <!-- Контейнер, куда скрипт безопасно подставит почту -->
+      <span id="email-secure-container"></span>
+    </footer>
+  </main>
+    
+    <!-- Скрипт защиты почты от спам-ботов и плавного скролла -->
+<!-- Скрипт защиты почты, плавного скролла и переключения тем -->
+<!-- Скрипт: защита почты, плавный скролл и переключение тем -->
+  <script>
+    (() => {
+      // Почта и навигация портфолио
+      const email = "dmitrisxxx" + "@" + "gmail.com";
+      const emailNode = document.getElementById("email-secure-container");
+      if (emailNode) {
+        emailNode.textContent = "";
+        const link = document.createElement("a");
+        link.href = "mailto:" + email;
+        link.textContent = email;
+        emailNode.appendChild(link);
+      }
+      document.getElementById("secure-write-btn")?.addEventListener("click", e => {
+        e.preventDefault(); window.location.href = `mailto:${email}`;
+      });
+      document.getElementById("view-skills-btn")?.addEventListener("click", e => {
+        e.preventDefault(); document.getElementById("skills").scrollIntoView({behavior:"smooth"});
+      });
+
+      // Переключение темы сайта
+      const themeButton = document.getElementById("theme-toggle");
+      const savedTheme = localStorage.getItem("theme") || "dark";
+      const setTheme = theme => {
+        if (theme === "light") document.documentElement.setAttribute("data-theme","light");
+        else document.documentElement.removeAttribute("data-theme");
+        localStorage.setItem("theme",theme);
+        themeButton.textContent = theme === "light" ? "🌙 Тёмная тема" : "☀️ Светлая тема";
+      };
+      setTheme(savedTheme);
+      themeButton.addEventListener("click", () => setTheme(document.documentElement.getAttribute("data-theme")==="light"?"dark":"light"));
+    })();
+  </script>
+  <style>
+    body, div, section, h1, h2, p, span, a {
+        transition: background 0.4s ease, background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease !important;
+    }
+  </style>
+  
+  
+  
+    

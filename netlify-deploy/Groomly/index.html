@@ -1,0 +1,2563 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#FF7A3D" />
+  <meta name="description" content="Groomly — премиальный сервис записи в груминг-салон для клиентов и грумеров." />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>Groomly — финальная версия</title>
+  <!-- Финальная автономная сборка: один файл, без CDN и внешних ресурсов -->
+  <style>
+    :root {
+      --orange: #FF7A3D;
+      --orange-deep: #FF6B35;
+      --blue: #4FC3F7;
+      --blue-deep: #29B6F6;
+      --bg: #F7F5F2;
+      --bg-elev: #FFFFFF;
+      --bg-soft: #FFF4ED;
+      --bg-blue: #EAF7FE;
+      --text: #1A1F2C;
+      --muted: #6B7285;
+      --line: #E8E4DE;
+      --ok: #22A06B;
+      --warn: #E2A336;
+      --danger: #E25555;
+      --shadow: 0 10px 30px rgba(26, 31, 44, 0.08);
+      --shadow-sm: 0 4px 14px rgba(26, 31, 44, 0.06);
+      --radius: 18px;
+      --radius-sm: 14px;
+      --nav-h: 74px;
+      --safe-b: env(safe-area-inset-bottom, 0px);
+      --grad: linear-gradient(135deg, #FF7A3D 0%, #FF9A5C 48%, #4FC3F7 120%);
+      --grad-soft: linear-gradient(180deg, #FFF8F3 0%, #F7F5F2 42%, #EEF8FD 100%);
+    }
+
+    html[data-theme="dark"] {
+      --bg: #0F131A;
+      --bg-elev: #1A212C;
+      --bg-soft: #2A211C;
+      --bg-blue: #152430;
+      --text: #F2F4F8;
+      --muted: #9AA3B5;
+      --line: #2A3342;
+      --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+      --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.28);
+      --grad-soft: linear-gradient(180deg, #1A1714 0%, #0F131A 45%, #101820 100%);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: "Segoe UI", "Trebuchet MS", "Avenir Next", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 10% -10%, rgba(255, 122, 61, 0.18), transparent 55%),
+        radial-gradient(800px 480px at 100% 0%, rgba(79, 195, 247, 0.16), transparent 50%),
+        var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; border: 0; background: none; }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+
+    .stage {
+      min-height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 18px 12px;
+    }
+
+    .phone {
+      width: min(430px, 100%);
+      height: min(900px, calc(100dvh - 36px), calc(100vh - 36px));
+      min-height: 640px;
+      background: var(--grad-soft);
+      border-radius: 34px;
+      box-shadow: var(--shadow), 0 0 0 1px rgba(255,255,255,0.35) inset;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Мобильный/тач: на весь экран без узкой «рамки телефона» */
+    @media (max-width: 1100px), (hover: none) and (pointer: coarse) {
+      html:not(.embed) .stage {
+        padding: 0;
+        min-height: 100dvh;
+        min-height: 100vh;
+        place-items: stretch;
+        background: var(--bg);
+      }
+      html:not(.embed) .phone {
+        width: 100% !important;
+        max-width: none !important;
+        height: 100dvh !important;
+        height: 100vh !important;
+        min-height: 100dvh !important;
+        min-height: 100vh !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+    }
+    html.mobile-fill:not(.embed) .stage {
+      padding: 0;
+      min-height: 100dvh;
+      min-height: 100vh;
+      place-items: stretch;
+      background: var(--bg);
+    }
+    html.mobile-fill:not(.embed) .phone {
+      width: 100% !important;
+      max-width: none !important;
+      height: 100dvh !important;
+      height: 100vh !important;
+      min-height: 100dvh !important;
+      min-height: 100vh !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+
+    html[data-theme="dark"] .phone {
+      box-shadow: var(--shadow), 0 0 0 1px rgba(255,255,255,0.04) inset;
+    }
+
+    .view { display: none; flex: 1; min-height: 0; flex-direction: column; }
+    .view.active { display: flex; animation: fadeUp .28s ease; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes pop {
+      from { opacity: 0; transform: scale(.96); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .scroll {
+      flex: 1;
+      overflow: auto;
+      padding: 18px 18px calc(var(--nav-h) + 18px);
+      -webkit-overflow-scrolling: touch;
+    }
+    .scroll.no-nav { padding-bottom: 28px; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 18px 8px;
+    }
+    .brand {
+      font-family: "Segoe UI Semibold", "Segoe UI", "Trebuchet MS", system-ui, sans-serif;
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: -0.03em;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .icon-btn {
+      width: 42px; height: 42px;
+      border-radius: 14px;
+      background: var(--bg-elev);
+      box-shadow: var(--shadow-sm);
+      display: grid; place-items: center;
+      color: var(--text);
+      transition: transform .15s ease, background .2s;
+    }
+    .icon-btn:active { transform: scale(.96); }
+
+    .eyebrow {
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--orange-deep);
+    }
+    h1, h2, h3 { font-family: "Segoe UI Semibold", "Segoe UI", "Trebuchet MS", system-ui, sans-serif; letter-spacing: -0.03em; }
+    h1 { font-size: 1.85rem; line-height: 1.15; }
+    h2 { font-size: 1.2rem; }
+    h3 { font-size: 1rem; }
+    .muted { color: var(--muted); }
+    .tiny { font-size: .82rem; }
+
+    .hero {
+      margin: 8px 18px 0;
+      padding: 22px;
+      border-radius: 24px;
+      background: var(--grad);
+      color: #fff;
+      box-shadow: 0 16px 36px rgba(255, 107, 53, 0.28);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -30px; top: -40px;
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.16);
+    }
+    .hero p { opacity: .92; margin-top: 8px; max-width: 24ch; }
+
+    .card {
+      background: var(--bg-elev);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--line);
+      padding: 16px;
+    }
+    .card + .card { margin-top: 12px; }
+    .section { margin-top: 22px; }
+    .section-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .linkish {
+      color: var(--blue-deep);
+      font-weight: 700;
+      font-size: .9rem;
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: 52px; padding: 0 18px;
+      border-radius: 16px;
+      font-weight: 700;
+      transition: transform .15s ease, filter .2s, background .2s;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn-primary {
+      background: var(--grad);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(255, 122, 61, 0.28);
+    }
+    .btn-secondary {
+      background: var(--bg-elev);
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+    }
+    .btn-blue {
+      background: linear-gradient(135deg, #4FC3F7, #29B6F6);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(41, 182, 246, 0.28);
+    }
+    .btn-block { width: 100%; }
+    .btn-sm { min-height: 40px; padding: 0 14px; border-radius: 12px; font-size: .9rem; }
+
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--bg-soft);
+      color: var(--orange-deep);
+      font-weight: 700;
+      font-size: .82rem;
+      border: 1px solid transparent;
+    }
+    .chip.blue { background: var(--bg-blue); color: #1780a8; }
+    html[data-theme="dark"] .chip.blue { color: var(--blue); }
+    .chip.ok { background: rgba(34,160,107,.12); color: var(--ok); }
+    .chip.warn { background: rgba(226,163,54,.15); color: var(--warn); }
+    .chip.danger { background: rgba(226,85,85,.12); color: var(--danger); }
+
+    .nav {
+      position: absolute;
+      left: 12px; right: 12px; bottom: 12px;
+      height: calc(var(--nav-h) - 8px);
+      padding-bottom: var(--safe-b);
+      background: color-mix(in srgb, var(--bg-elev) 92%, transparent);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      box-shadow: var(--shadow);
+      z-index: 20;
+    }
+    .nav button {
+      display: grid;
+      place-items: center;
+      gap: 3px;
+      font-size: .68rem;
+      font-weight: 700;
+      color: var(--muted);
+      padding: 8px 4px;
+    }
+    .nav button svg { width: 22px; height: 22px; }
+    .nav button.active { color: var(--orange-deep); }
+
+    .welcome {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 28px 22px 26px;
+      background:
+        radial-gradient(420px 280px at 80% 10%, rgba(79,195,247,.25), transparent 60%),
+        radial-gradient(380px 260px at 0% 80%, rgba(255,122,61,.22), transparent 55%),
+        var(--bg);
+    }
+    .logo-mark {
+      width: 64px; height: 64px;
+      border-radius: 20px;
+      background: var(--grad);
+      display: grid; place-items: center;
+      color: #fff;
+      font-family: "Segoe UI Semibold", "Segoe UI", system-ui, sans-serif;
+      font-weight: 800;
+      font-size: 1.5rem;
+      box-shadow: 0 14px 30px rgba(255,122,61,.35);
+    }
+    .role-grid { display: grid; gap: 12px; margin-top: 18px; }
+    .role-card {
+      text-align: left;
+      padding: 18px;
+      border-radius: 20px;
+      background: var(--bg-elev);
+      border: 1.5px solid var(--line);
+      box-shadow: var(--shadow-sm);
+      transition: border-color .2s, transform .15s;
+    }
+    .role-card:active { transform: scale(.985); }
+    .role-card.selected { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255,122,61,.18); }
+    .role-card h3 { margin: 8px 0 4px; }
+    .role-ico {
+      width: 42px; height: 42px; border-radius: 14px;
+      display: grid; place-items: center; color: #fff;
+      background: linear-gradient(135deg, var(--orange), var(--orange-deep));
+    }
+    .role-card.groomer .role-ico { background: linear-gradient(135deg, var(--blue), var(--blue-deep)); }
+
+    .field { margin-bottom: 12px; }
+    .field label {
+      display: block;
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      min-height: 50px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--bg-elev);
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field textarea { min-height: 96px; resize: vertical; }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(255,122,61,.15);
+    }
+
+    .list { display: grid; gap: 10px; }
+    .row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px;
+      border-radius: 16px;
+      background: var(--bg-elev);
+      border: 1px solid var(--line);
+      text-align: left;
+      width: 100%;
+      transition: transform .15s ease, border-color .2s;
+    }
+    .row:active { transform: scale(.985); }
+    .row.selected { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255,122,61,.12); }
+    .row .meta { flex: 1; min-width: 0; }
+    .row .meta strong { display: block; }
+    .avatar, .pet-photo {
+      width: 52px; height: 52px; border-radius: 16px;
+      object-fit: cover; background: var(--bg-soft); flex-shrink: 0;
+    }
+    .avatar.lg, .pet-photo.lg { width: 84px; height: 84px; border-radius: 22px; }
+    .avatar.sm, .pet-photo.sm { width: 40px; height: 40px; border-radius: 12px; }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stat {
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--bg-elev);
+      border: 1px solid var(--line);
+    }
+    .stat .val {
+      font-family: "Segoe UI Semibold", "Segoe UI", system-ui, sans-serif;
+      font-size: 1.45rem;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .day {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      display: grid; place-items: center;
+      font-weight: 700;
+      font-size: .85rem;
+      background: var(--bg-elev);
+      border: 1px solid transparent;
+      color: var(--text);
+    }
+    .day.muted { color: var(--muted); opacity: .5; }
+    .day.has { box-shadow: inset 0 -3px 0 var(--orange); }
+    .day.selected {
+      background: var(--grad);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .slot {
+      min-height: 44px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--bg-elev);
+      font-weight: 700;
+    }
+    .slot.free {
+      background: #E7F8EE;
+      color: #1B6B3A;
+      border-color: #B7E6C7;
+    }
+    .slot.busy {
+      background: #E6E8EC;
+      color: #8A93A3;
+      border-color: #D5D9E0;
+      cursor: not-allowed;
+      text-decoration: line-through;
+    }
+    html[data-theme="dark"] .slot.free {
+      background: rgba(34,160,107,.22);
+      color: #8DDBB0;
+      border-color: rgba(34,160,107,.35);
+    }
+    html[data-theme="dark"] .slot.busy {
+      background: #2A3342;
+      color: #7A8496;
+      border-color: #3A4556;
+    }
+    .slot.selected { background: var(--grad); color: #fff; border-color: transparent; text-decoration: none; }
+    .slot:disabled { opacity: .35; }
+    .slot-legend {
+      display: flex; flex-wrap: wrap; gap: 10px 14px;
+      margin: 0 0 12px; font-size: 12px; font-weight: 700; color: var(--muted);
+    }
+    .slot-legend i {
+      display: inline-block; width: 12px; height: 12px; border-radius: 4px;
+      margin-right: 6px; vertical-align: -1px;
+    }
+    .slot-legend .lg-free { background: #B7E6C7; }
+    .slot-legend .lg-busy { background: #D5D9E0; }
+
+    .cal {
+      background: var(--bg-elev);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+    .cal-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; margin-bottom: 10px;
+    }
+    .cal-nav strong {
+      font-size: 15px; text-transform: capitalize;
+    }
+    .cal-nav button {
+      width: 36px; height: 36px; border-radius: 12px;
+      border: 1px solid var(--line); background: var(--bg-soft);
+      font-size: 18px; font-weight: 700; color: var(--text);
+    }
+    .cal-weekdays, .cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+    }
+    .cal-weekdays span {
+      text-align: center; font-size: 11px; font-weight: 700;
+      color: var(--muted); padding: 4px 0;
+    }
+    .cal-grid button {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+      min-height: 38px;
+    }
+    .cal-grid button.muted-day { color: var(--muted); opacity: .45; }
+    .cal-grid button.other { visibility: hidden; pointer-events: none; }
+    .cal-grid button.selected {
+      background: var(--grad);
+      color: #fff;
+    }
+    .cal-grid button.today:not(.selected) {
+      box-shadow: inset 0 0 0 1.5px var(--orange);
+    }
+
+    .steps { display: flex; gap: 6px; margin: 4px 18px 0; }
+    .steps span {
+      flex: 1; height: 4px; border-radius: 99px;
+      background: var(--line);
+    }
+    .steps span.on { background: var(--grad); }
+
+    .chat {
+      display: flex; flex-direction: column; gap: 10px;
+      padding-bottom: 8px;
+    }
+    .bubble {
+      max-width: 82%;
+      padding: 12px 14px;
+      border-radius: 18px;
+      font-size: .94rem;
+      line-height: 1.4;
+      animation: pop .2s ease;
+    }
+    .bubble.them {
+      align-self: flex-start;
+      background: var(--bg-elev);
+      border: 1px solid var(--line);
+      border-bottom-left-radius: 6px;
+    }
+    .bubble.me {
+      align-self: flex-end;
+      background: var(--grad);
+      color: #fff;
+      border-bottom-right-radius: 6px;
+    }
+    .bubble .time { display: block; margin-top: 6px; font-size: .72rem; opacity: .7; }
+    .composer {
+      display: flex; gap: 8px; align-items: center;
+      padding: 10px 12px calc(12px + var(--safe-b));
+      border-top: 1px solid var(--line);
+      background: var(--bg-elev);
+    }
+    .composer input {
+      flex: 1; min-height: 46px; border-radius: 14px;
+      border: 1px solid var(--line); padding: 0 14px; background: var(--bg);
+    }
+    .send {
+      width: 46px; height: 46px; border-radius: 14px;
+      background: var(--grad); color: #fff;
+      display: grid; place-items: center;
+    }
+
+    .photo-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .photo-pair figure {
+      border-radius: 14px; overflow: hidden; background: var(--bg-soft);
+      border: 1px solid var(--line);
+    }
+    .photo-pair img { width: 100%; height: 110px; object-fit: cover; }
+    .photo-pair figcaption {
+      padding: 6px 8px; font-size: .72rem; font-weight: 700; color: var(--muted);
+    }
+
+    .pet-hero {
+      display: grid; place-items: center; gap: 10px; text-align: center;
+      padding: 8px 0 4px;
+    }
+    .pet-hero .pet-photo {
+      width: 120px; height: 120px; border-radius: 28px;
+      box-shadow: var(--shadow);
+    }
+    .upload-btn {
+      position: relative; overflow: hidden;
+    }
+    .upload-btn input {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    }
+
+    .toast {
+      position: absolute; left: 18px; right: 18px; top: 18px;
+      z-index: 50; padding: 14px 16px; border-radius: 16px;
+      background: var(--text); color: var(--bg); font-weight: 700;
+      box-shadow: var(--shadow); transform: translateY(-120%);
+      transition: transform .28s ease; pointer-events: none;
+    }
+    .toast.show { transform: none; }
+
+    .sheet {
+      position: absolute; inset: 0; z-index: 40;
+      background: rgba(10, 14, 20, .45);
+      display: none; align-items: flex-end;
+    }
+    .sheet.open { display: flex; animation: fadeUp .2s ease; }
+    .sheet-body {
+      width: 100%; max-height: 86%;
+      background: var(--bg);
+      border-radius: 28px 28px 0 0;
+      padding: 10px 18px 24px;
+      overflow: auto;
+      animation: pop .22s ease;
+    }
+    .handle {
+      width: 42px; height: 5px; border-radius: 99px;
+      background: var(--line); margin: 6px auto 14px;
+    }
+
+    .pay-card-visual {
+      border-radius: 20px;
+      padding: 20px 18px;
+      background: linear-gradient(135deg, #FF7A3D 0%, #FF9A5C 42%, #29B6F6 120%);
+      color: #fff;
+      box-shadow: 0 14px 28px rgba(255, 122, 61, 0.28);
+      margin-bottom: 16px;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .pay-card-visual .brand-line {
+      display: flex; justify-content: space-between; align-items: center;
+      font-weight: 800; letter-spacing: .04em;
+    }
+    .pay-card-visual .num {
+      font-family: "Segoe UI Semibold", "Segoe UI", "Trebuchet MS", system-ui, sans-serif;
+      font-size: 1.2rem;
+      letter-spacing: .12em;
+      margin-top: 18px;
+    }
+    .pay-card-visual .meta-row {
+      display: flex; justify-content: space-between; gap: 12px;
+      font-size: .78rem; opacity: .92; margin-top: 14px;
+    }
+    .field-error {
+      color: var(--danger);
+      font-size: .78rem;
+      font-weight: 700;
+      margin-top: -6px;
+      margin-bottom: 10px;
+      display: none;
+    }
+    .field-error.show { display: block; }
+
+    .price {
+      font-family: "Segoe UI Semibold", "Segoe UI", system-ui, sans-serif;
+      font-weight: 800;
+      color: var(--orange-deep);
+    }
+    .stars { color: #F5B942; letter-spacing: 1px; }
+    .divider { height: 1px; background: var(--line); margin: 14px 0; }
+    .stack { display: grid; gap: 10px; }
+    .row-between { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .empty {
+      text-align: center; padding: 36px 18px; color: var(--muted);
+    }
+    .empty .emoji { font-size: 2rem; margin-bottom: 8px; }
+
+    .phone-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-weight: 700; font-size: .82rem;
+      color: var(--blue-deep);
+      white-space: nowrap;
+    }
+    .phone-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 12px; border-radius: 999px;
+      background: var(--bg-blue); color: #1780a8;
+      font-weight: 700; font-size: .82rem;
+      border: 1px solid transparent;
+    }
+    html[data-theme="dark"] .phone-pill { color: var(--blue); }
+
+    .chart {
+      display: flex; align-items: flex-end; gap: 8px; height: 120px;
+      padding-top: 8px;
+    }
+    .bar {
+      flex: 1; border-radius: 10px 10px 6px 6px;
+      background: linear-gradient(180deg, #FF9A5C, #FF7A3D);
+      min-height: 8px;
+      position: relative;
+    }
+    .bar span {
+      position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+      font-size: .68rem; color: var(--muted); font-weight: 700;
+    }
+
+    .back {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-weight: 700; color: var(--muted); margin-bottom: 8px;
+    }
+
+    @media (max-width: 480px) {
+      .stage { padding: 0; }
+      .phone {
+        width: 100%; height: 100vh; height: 100dvh;
+        min-height: 100%; border-radius: 0; box-shadow: none;
+      }
+    }
+
+    /* Режим встраивания в портфолио (iframe) — absolute fill для мобильных WebView */
+    html.embed, html.embed body {
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      overflow: hidden;
+      position: relative;
+      background: var(--bg);
+    }
+    html.embed .stage {
+      position: absolute;
+      inset: 0;
+      padding: 0;
+      min-height: 0;
+      height: 100%;
+      width: 100%;
+      place-items: stretch;
+      background: transparent;
+    }
+    html.embed .phone {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    /* Кнопка возврата на сайт-визитку (не в iframe) */
+    .back-to-site {
+      flex: 0 0 auto;
+      align-self: flex-start;
+      z-index: 40;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin: 10px 12px 0;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      color: #1A1F2C;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: var(--shadow-sm);
+      text-decoration: none;
+    }
+    html[data-theme="dark"] .back-to-site {
+      background: rgba(26,33,44,.92);
+      color: #F2F4F8;
+    }
+    html.embed .back-to-site { display: none !important; }
+  </style>
+  <script>
+    (function () {
+      var root = document.documentElement;
+      if (window.self !== window.top || /(?:\?|&)embed=1(?:&|$)/.test(location.search)) {
+        root.classList.add("embed");
+      }
+      function markMobile() {
+        var touch = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+        var narrow = Math.min(window.innerWidth, window.innerHeight) < 1100;
+        root.classList.toggle("mobile-fill", touch || narrow);
+      }
+      markMobile();
+      window.addEventListener("resize", markMobile);
+      window.addEventListener("orientationchange", markMobile);
+
+      document.addEventListener("DOMContentLoaded", function () {
+        var back = document.getElementById("backToSite");
+        if (!back || root.classList.contains("embed")) return;
+        back.addEventListener("click", function (event) {
+          if (window.history.length > 1) {
+            event.preventDefault();
+            window.history.back();
+          }
+        });
+      });
+    })();
+  </script>
+</head>
+<body>
+  <div class="stage">
+    <div class="phone" id="app">
+      <a class="back-to-site" id="backToSite" href="../index.html">← Назад к визитке</a>
+      <div class="toast" id="toast"></div>
+
+      <!-- WELCOME -->
+      <section class="view active" id="view-welcome">
+        <div class="welcome">
+          <div>
+            <div class="row-between">
+              <div class="logo-mark">G</div>
+              <button class="icon-btn" id="themeWelcome" aria-label="Тема"></button>
+            </div>
+            <p class="eyebrow" style="margin-top:28px">Groomly</p>
+            <h1 style="margin-top:8px">Груминг, который чувствует себя как премиум-сервис</h1>
+            <p class="muted" style="margin-top:10px;max-width:32ch">Запись, питомцы, чат и оплата — в одном спокойном приложении для клиентов и салонов.</p>
+          </div>
+          <div>
+            <p class="tiny muted" style="margin-bottom:10px;font-weight:700">Кто вы?</p>
+            <div class="role-grid">
+              <button class="role-card selected" data-role="client" type="button">
+                <div class="role-ico">🐾</div>
+                <h3>Клиент</h3>
+                <p class="tiny muted">Запись, питомцы, чат, оплата и отзывы</p>
+              </button>
+              <button class="role-card groomer" data-role="groomer" type="button">
+                <div class="role-ico">✂️</div>
+                <h3>Грумер / салон</h3>
+                <p class="tiny muted">Календарь, заявки, клиенты и аналитика</p>
+              </button>
+            </div>
+            <button class="btn btn-primary btn-block" id="enterBtn" style="margin-top:16px">Войти в демо</button>
+            <a class="phone-pill" href="tel:+79211111111" style="display:flex;justify-content:center;margin-top:12px">☎ +7 921 111-11-11</a>
+            <p class="tiny muted" style="text-align:center;margin-top:10px">Финальная версия · один файл · СПб</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CLIENT SHELL -->
+      <section class="view" id="view-client">
+        <div class="topbar">
+          <div>
+            <div class="brand">Groomly</div>
+            <div class="tiny muted" id="clientGreeting">Привет</div>
+            <a class="phone-link" href="tel:+79211111111">+7 921 111-11-11</a>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="icon-btn" id="themeClient" aria-label="Тема"></button>
+            <button class="icon-btn" id="switchRoleClient" title="Сменить роль" aria-label="Сменить роль">⇄</button>
+          </div>
+        </div>
+        <div class="scroll" id="clientScroll"></div>
+        <nav class="nav" id="clientNav"></nav>
+      </section>
+
+      <!-- GROOMER SHELL -->
+      <section class="view" id="view-groomer">
+        <div class="topbar">
+          <div>
+            <div class="brand">Groomly Pro</div>
+            <div class="tiny muted" id="groomerGreeting">Салон</div>
+            <a class="phone-link" href="tel:+79211111111">+7 921 111-11-11</a>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="icon-btn" id="themeGroomer" aria-label="Тема"></button>
+            <button class="icon-btn" id="switchRoleGroomer" title="Сменить роль" aria-label="Сменить роль">⇄</button>
+          </div>
+        </div>
+        <div class="scroll" id="groomerScroll"></div>
+        <nav class="nav" id="groomerNav"></nav>
+      </section>
+
+      <!-- BOOKING FLOW -->
+      <section class="view" id="view-booking">
+        <div class="topbar">
+          <button class="back" id="bookingBack">← Назад</button>
+          <div style="display:flex;align-items:center;gap:8px">
+            <a class="phone-pill" href="tel:+79211111111">☎ +7 921 111-11-11</a>
+            <button class="icon-btn" id="themeBooking" aria-label="Тема"></button>
+          </div>
+        </div>
+        <div class="steps" id="bookSteps"></div>
+        <div class="scroll no-nav" id="bookingScroll"></div>
+      </section>
+
+      <!-- PET EDITOR -->
+      <section class="view" id="view-pet-edit">
+        <div class="topbar">
+          <button class="back" id="petEditBack">← Назад</button>
+          <button class="icon-btn" id="themePet" aria-label="Тема"></button>
+        </div>
+        <div class="scroll no-nav" id="petEditScroll"></div>
+      </section>
+
+      <!-- SHEET -->
+      <div class="sheet" id="sheet">
+        <div class="sheet-body" id="sheetBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (() => {
+    "use strict";
+
+    const STORAGE = "groomly_final";
+    const SALON_PHONE = "+7 921 111-11-11";
+    const SALON_PHONE_TEL = "tel:+79211111111";
+
+    function svgUri(svg) {
+      return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    }
+
+    function avatarUri(initials, c1, c2) {
+      return svgUri(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs><rect width="200" height="200" rx="48" fill="url(#g)"/><text x="100" y="118" text-anchor="middle" fill="#fff" font-family="Segoe UI,Arial,sans-serif" font-size="58" font-weight="700">${initials}</text></svg>`);
+    }
+
+    function petUri(kind) {
+      if (kind === "cat") {
+        return svgUri(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#EAF7FE"/><stop offset="1" stop-color="#FFF4ED"/></linearGradient></defs><rect width="400" height="400" fill="url(#bg)"/><ellipse cx="200" cy="230" rx="110" ry="95" fill="#C7A07A"/><ellipse cx="200" cy="210" rx="88" ry="78" fill="#E0B98C"/><polygon points="95,150 130,70 165,155" fill="#C7A07A"/><polygon points="235,155 270,70 305,150" fill="#C7A07A"/><polygon points="112,145 132,95 152,148" fill="#F3D2B3"/><polygon points="248,148 268,95 288,145" fill="#F3D2B3"/><circle cx="165" cy="205" r="12" fill="#1A1F2C"/><circle cx="235" cy="205" r="12" fill="#1A1F2C"/><circle cx="169" cy="201" r="4" fill="#fff"/><circle cx="239" cy="201" r="4" fill="#fff"/><path d="M188 235 Q200 248 212 235" stroke="#8B5E3C" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M120 220 H155 M245 220 H280 M125 240 H155 M245 240 H275" stroke="#8B5E3C" stroke-width="4" stroke-linecap="round"/><text x="200" y="360" text-anchor="middle" fill="#6B7285" font-family="Segoe UI,Arial,sans-serif" font-size="22" font-weight="700">Мейн-кун</text></svg>`);
+      }
+      return svgUri(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFF4ED"/><stop offset="1" stop-color="#EAF7FE"/></linearGradient></defs><rect width="400" height="400" fill="url(#bg)"/><ellipse cx="200" cy="255" rx="120" ry="85" fill="#E8A45A"/><circle cx="200" cy="175" r="78" fill="#F0B46A"/><ellipse cx="118" cy="168" rx="28" ry="42" fill="#E08A3C"/><ellipse cx="282" cy="168" rx="28" ry="42" fill="#E08A3C"/><circle cx="172" cy="170" r="11" fill="#1A1F2C"/><circle cx="228" cy="170" r="11" fill="#1A1F2C"/><circle cx="176" cy="166" r="3.5" fill="#fff"/><circle cx="232" cy="166" r="3.5" fill="#fff"/><ellipse cx="200" cy="195" rx="16" ry="11" fill="#C45C3E"/><path d="M185 212 Q200 225 215 212" stroke="#8B4513" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cx="145" cy="300" rx="28" ry="18" fill="#E08A3C"/><ellipse cx="255" cy="300" rx="28" ry="18" fill="#E08A3C"/><text x="200" y="360" text-anchor="middle" fill="#6B7285" font-family="Segoe UI,Arial,sans-serif" font-size="22" font-weight="700">Корги</text></svg>`);
+    }
+
+    function shotUri(label, tone) {
+      const bg = tone === "after" ? "#EAF7FE" : "#FFF4ED";
+      const accent = tone === "after" ? "#29B6F6" : "#FF7A3D";
+      return svgUri(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="400" height="300" fill="${bg}"/><circle cx="200" cy="130" r="58" fill="${accent}" opacity=".85"/><text x="200" y="138" text-anchor="middle" fill="#fff" font-family="Segoe UI,Arial,sans-serif" font-size="28" font-weight="700">${label}</text><text x="200" y="230" text-anchor="middle" fill="#6B7285" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700">Фото визита</text></svg>`);
+    }
+
+    const DEFAULT_DOG = petUri("dog");
+    const DEFAULT_CAT = petUri("cat");
+    const SHOT_BEFORE = shotUri("До", "before");
+    const SHOT_AFTER = shotUri("После", "after");
+
+    /* Средние ориентиры по Санкт-Петербургу, 2026 */
+    const SERVICES = [
+      { id: "dog_full", name: "Комплексный груминг", species: "dog", mins: 120, price: 2500, priceLabel: "от 2 500 ₽", desc: "Мытьё + стрижка + когти + уши · малые от 2 500 ₽, крупные до 4 500 ₽" },
+      { id: "dog_hygiene", name: "Гигиеническая стрижка", species: "dog", mins: 75, price: 1800, priceLabel: "от 1 800 ₽", desc: "Гигиена без полной модели" },
+      { id: "dog_model", name: "Модельная стрижка", species: "dog", mins: 90, price: 2800, priceLabel: "от 2 800 ₽", desc: "Форма под породу, фейс, лапки" },
+      { id: "dog_nails", name: "Стрижка когтей", species: "dog", mins: 20, price: 300, priceLabel: "300–500 ₽", desc: "Аккуратная подрезка когтей" },
+      { id: "dog_ears", name: "Чистка ушей", species: "dog", mins: 20, price: 300, priceLabel: "300–500 ₽", desc: "Осмотр и чистка ушных раковин" },
+      { id: "dog_shed", name: "Экспресс-линька", species: "dog", mins: 60, price: 2000, priceLabel: "от 2 000 ₽", desc: "Интенсивное вычёсывание линьки" },
+      { id: "cat_full", name: "Комплексный груминг", species: "cat", mins: 100, price: 2000, priceLabel: "от 2 000 ₽", desc: "Полный уход · до 3 500 ₽ в зависимости от длины шерсти" },
+      { id: "cat_hygiene", name: "Гигиеническая стрижка", species: "cat", mins: 70, price: 1800, priceLabel: "от 1 800 ₽", desc: "Гигиена без агрессивной стрижки" },
+      { id: "cat_shed", name: "Вычёсывание / экспресс-линька", species: "cat", mins: 50, price: 1500, priceLabel: "от 1 500 ₽", desc: "Снятие колтунов и линьки" },
+      { id: "cat_nails", name: "Стрижка когтей", species: "cat", mins: 15, price: 300, priceLabel: "300–500 ₽", desc: "Бережная подрезка" },
+      { id: "cat_ears", name: "Чистка ушей", species: "cat", mins: 15, price: 300, priceLabel: "300–500 ₽", desc: "Чистка и контроль состояния" }
+    ];
+
+    const GROOMERS = [
+      { id: "olga", name: "Ольга", title: "Топ-мастер", rating: 5.0, specialty: "Сложные стрижки и крупные породы", experience: "12 лет", avatar: avatarUri("Ол", "#FF7A3D", "#FF6B35"), slots: ["10:00","11:30","13:00","15:00","17:30"] },
+      { id: "sergey", name: "Сергей", title: "Старший мастер", rating: 4.9, specialty: "Собаки всех размеров", experience: "8 лет", avatar: avatarUri("Се", "#29B6F6", "#4FC3F7"), slots: ["09:30","12:00","14:30","16:00","18:00"] },
+      { id: "elena", name: "Елена", title: "Мастер", rating: 4.8, specialty: "Кошки и гигиенический уход", experience: "5 лет", avatar: avatarUri("Ел", "#FF9A5C", "#29B6F6"), slots: ["11:00","12:30","15:30","17:00"] },
+      { id: "natalya", name: "Наталья", title: "Мастер", rating: 4.8, specialty: "Гигиена, когти и уход за шерстью", experience: "4 года", avatar: avatarUri("На", "#4FC3F7", "#FF7A3D"), slots: ["10:30","12:00","14:00","16:30","18:30"] }
+    ];
+
+    const ICONS = {
+      home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>',
+      book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>',
+      pets: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="9" r="2.2"/><circle cx="16" cy="9" r="2.2"/><circle cx="5.5" cy="14.5" r="2"/><circle cx="18.5" cy="14.5" r="2"/><ellipse cx="12" cy="16.5" rx="3.2" ry="2.6"/></svg>',
+      chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 18.5 3 21V7a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H8z"/></svg>',
+      profile: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M5 19.5a7 7 0 0 1 14 0"/></svg>',
+      today: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2.5"/></svg>',
+      clients: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M14 19a4.5 4.5 0 0 1 6.5-4"/></svg>',
+      more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/></svg>',
+      sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+      moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A7.5 7.5 0 1 1 9.5 4 6 6 0 0 0 20 14.5z"/></svg>'
+    };
+
+    function money(n) {
+      return new Intl.NumberFormat("ru-RU").format(n) + " ₽";
+    }
+
+    function todayISO() {
+      const d = new Date();
+      return d.toISOString().slice(0, 10);
+    }
+
+    function addDaysISO(n) {
+      const d = new Date();
+      d.setDate(d.getDate() + n);
+      return d.toISOString().slice(0, 10);
+    }
+
+    function formatDate(iso) {
+      const d = new Date(iso + "T12:00:00");
+      return d.toLocaleDateString("ru-RU", { day: "numeric", month: "short", weekday: "short" });
+    }
+
+    function toLocalISO(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function parseLocalISO(iso) {
+      const [y, m, d] = iso.split("-").map(Number);
+      return new Date(y, m - 1, d);
+    }
+
+    function monthLabel(ym) {
+      const [y, m] = ym.split("-").map(Number);
+      const d = new Date(y, m - 1, 1);
+      return d.toLocaleDateString("ru-RU", { month: "long", year: "numeric" });
+    }
+
+    function shiftMonth(ym, delta) {
+      const [y, m] = ym.split("-").map(Number);
+      const d = new Date(y, m - 1 + delta, 1);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    }
+
+    /** Детерминированная «занятость»: у каждого мастера свой набор на дату */
+    function hashSeed(str) {
+      let h = 2166136261;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return h >>> 0;
+    }
+
+    function isSlotBusy(groomerId, dateIso, time) {
+      const h = hashSeed(`${groomerId}|${dateIso}|${time}`);
+      return (h % 10) < 4; // ~40% занято, разный паттерн у мастеров
+    }
+
+    function masterDaySlots(groomer) {
+      return Array.isArray(groomer?.slots) ? groomer.slots.slice() : [];
+    }
+
+    function ensureCalMonth(draft) {
+      if (!draft.calMonth) {
+        const base = draft.date ? parseLocalISO(draft.date) : new Date();
+        draft.calMonth = `${base.getFullYear()}-${String(base.getMonth() + 1).padStart(2, "0")}`;
+      }
+      return draft.calMonth;
+    }
+
+    function renderMonthCalendar(draft) {
+      const ym = ensureCalMonth(draft);
+      const [y, m] = ym.split("-").map(Number);
+      const first = new Date(y, m - 1, 1);
+      const daysInMonth = new Date(y, m, 0).getDate();
+      let startWeekday = first.getDay(); // 0=вс
+      startWeekday = startWeekday === 0 ? 6 : startWeekday - 1; // пн=0
+      const today = toLocalISO(new Date());
+      const cells = [];
+      for (let i = 0; i < startWeekday; i++) cells.push(`<button type="button" class="other" tabindex="-1" aria-hidden="true"></button>`);
+      for (let day = 1; day <= daysInMonth; day++) {
+        const iso = `${y}-${String(m).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        const past = iso < today;
+        const selected = draft.date === iso;
+        const isToday = iso === today;
+        cells.push(`<button type="button" class="${selected ? "selected" : ""} ${isToday ? "today" : ""} ${past ? "muted-day" : ""}" data-pick="date" data-id="${iso}" ${past ? "disabled" : ""}>${day}</button>`);
+      }
+      return `
+        <div class="cal">
+          <div class="cal-nav">
+            <button type="button" data-cal="prev" aria-label="Предыдущий месяц">‹</button>
+            <strong>${monthLabel(ym)}</strong>
+            <button type="button" data-cal="next" aria-label="Следующий месяц">›</button>
+          </div>
+          <div class="cal-weekdays">
+            ${["пн","вт","ср","чт","пт","сб","вс"].map((w) => `<span>${w}</span>`).join("")}
+          </div>
+          <div class="cal-grid">${cells.join("")}</div>
+        </div>`;
+    }
+
+    function uid(prefix) {
+      return prefix + "_" + Math.random().toString(36).slice(2, 9);
+    }
+
+    function defaultPhoto(type) {
+      return type === "cat" ? DEFAULT_CAT : DEFAULT_DOG;
+    }
+
+    function seedState() {
+      return {
+        theme: "light",
+        role: null,
+        user: {
+          client: { name: "Мария Соколова", phone: "+7 903 112-45-67", email: "maria@example.com" },
+          groomer: { name: "Ольга", salon: "Groomly Studio · СПб", phone: SALON_PHONE }
+        },
+        pets: [
+          { id: "pet_rex", name: "Рекс", type: "dog", breed: "Корги", age: "3 года", notes: "Любит лакомства", photo: DEFAULT_DOG, customPhoto: false },
+          { id: "pet_mimi", name: "Мими", type: "cat", breed: "Мейн-кун", age: "2 года", notes: "Чувствительна к фенам", photo: DEFAULT_CAT, customPhoto: false }
+        ],
+        appointments: [
+          { id: "ap1", date: addDaysISO(2), time: "15:00", serviceIds: ["dog_full", "dog_nails"], serviceId: "dog_full", groomerId: "olga", petId: "pet_rex", status: "confirmed", price: 2800, tip: 0, paid: true },
+          { id: "ap2", date: addDaysISO(-12), time: "12:00", serviceIds: ["cat_full"], serviceId: "cat_full", groomerId: "elena", petId: "pet_mimi", status: "done", price: 2000, tip: 300, paid: true, before: SHOT_BEFORE, after: SHOT_AFTER },
+          { id: "ap3", date: addDaysISO(-30), time: "11:30", serviceIds: ["dog_model", "dog_ears"], serviceId: "dog_model", groomerId: "sergey", petId: "pet_rex", status: "done", price: 3100, tip: 500, paid: true, before: SHOT_BEFORE, after: SHOT_AFTER }
+        ],
+        requests: [
+          { id: "rq1", client: "Игорь П.", pet: "Барон · Лабрадор", service: "Комплексный груминг", date: addDaysISO(1), time: "16:00", note: "Первый визит, нужна встреча" }
+        ],
+        clients: [
+          { id: "c1", name: "Мария Соколова", phone: "+7 903 112-45-67", pets: "Рекс, Мими", visits: 8 },
+          { id: "c2", name: "Игорь П.", phone: "+7 916 555-20-01", pets: "Барон", visits: 0 },
+          { id: "c3", name: "Елена Ким", phone: "+7 926 441-09-33", pets: "Пуша", visits: 5 }
+        ],
+        chat: [
+          { id: 1, from: "salon", text: "Здравствуйте! Напоминаем о записи Рекса на пятницу в 15:00.", time: "10:12" },
+          { id: 2, from: "me", text: "Спасибо, будем. Можно взять SPA-маску?", time: "10:18" },
+          { id: 3, from: "salon", text: "Конечно, добавим к визиту. До встречи!", time: "10:20" }
+        ],
+        cards: [{ id: "card1", brand: "Visa", last4: "4242", exp: "09/28", holder: "MARIA SOKOLOVA" }],
+        payments: [
+          { id: "pay1", title: "Комплексный груминг · Рекс", amount: 2500, tip: 0, date: addDaysISO(0), method: "Mir ••4242" },
+          { id: "pay2", title: "Комплексный груминг · Мими", amount: 2000, tip: 300, date: addDaysISO(-12), method: "Mir ••4242" }
+        ],
+        reviews: [{ id: "rv1", pet: "Мими", stars: 5, text: "Елена волшебница. Мейн-кун вышел пушистым облаком!", date: addDaysISO(-11) }],
+        promo: null,
+        giftBalance: 1500,
+        reminders: true,
+        clientTab: "home",
+        groomerTab: "today",
+        selectedDay: todayISO(),
+        draft: null
+      };
+    }
+
+    let state = load();
+
+    function load() {
+      try {
+        const raw = localStorage.getItem(STORAGE);
+        if (!raw) return seedState();
+        return { ...seedState(), ...JSON.parse(raw) };
+      } catch {
+        return seedState();
+      }
+    }
+
+    function save() {
+      // Не сохраняем PAN/CVV и прочие платёжные секреты — только маска карты
+      if (Array.isArray(state.cards)) {
+        state.cards = state.cards.map((c) => ({
+          id: c.id,
+          brand: c.brand,
+          last4: String(c.last4 || "").replace(/\D/g, "").slice(-4),
+          exp: c.exp,
+          holder: c.holder
+        }));
+      }
+      const payload = { ...state };
+      delete payload.__pan;
+      delete payload.__cvv;
+      localStorage.setItem(STORAGE, JSON.stringify(payload));
+    }
+
+    function toast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => el.classList.remove("show"), 2200);
+    }
+
+    function applyTheme() {
+      document.documentElement.setAttribute("data-theme", state.theme);
+      const icon = state.theme === "dark" ? ICONS.sun : ICONS.moon;
+      ["themeWelcome", "themeClient", "themeGroomer", "themeBooking", "themePet"].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = icon;
+      });
+    }
+
+    function showView(id) {
+      document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+
+    function serviceById(id) { return SERVICES.find((s) => s.id === id); }
+    function groomerById(id) { return GROOMERS.find((g) => g.id === id); }
+    function petById(id) { return state.pets.find((p) => p.id === id); }
+    function servicePrice(s) { return s?.priceLabel || money(s?.price || 0); }
+    function servicesFor(species) { return SERVICES.filter((s) => s.species === species); }
+    function appointmentServiceIds(a) {
+      if (Array.isArray(a?.serviceIds) && a.serviceIds.length) return a.serviceIds;
+      return a?.serviceId ? [a.serviceId] : [];
+    }
+    function servicesLabel(ids) {
+      return (ids || []).map((id) => serviceById(id)?.name).filter(Boolean).join(" + ");
+    }
+    function draftServiceList(d) {
+      return (d?.serviceIds || []).map(serviceById).filter(Boolean);
+    }
+    function draftBaseTotal(d) {
+      return draftServiceList(d).reduce((sum, s) => sum + (s.price || 0), 0);
+    }
+    function draftSpecies(d) {
+      return draftServiceList(d)[0]?.species || null;
+    }
+    function syncPetToSpecies(species) {
+      if (!species || !state.draft) return;
+      const pet = petById(state.draft.petId);
+      if (!pet || pet.type !== species) {
+        state.draft.petId = state.pets.find((p) => p.type === species)?.id || null;
+      }
+    }
+    function masterCard(g, opts = {}) {
+      const bookAction = opts.bookAction || "book-master";
+      return `
+        <div class="card">
+          <div class="row" style="border:0;padding:0;box-shadow:none">
+            <img class="avatar" src="${g.avatar}" alt="${g.name}" />
+            <div class="meta">
+              <strong>${g.name}</strong>
+              <div class="tiny muted">${g.title} · ★ ${g.rating}</div>
+              <div class="tiny muted">${g.specialty}</div>
+            </div>
+            <span class="chip ${g.id === "olga" ? "ok" : g.id === "sergey" ? "blue" : ""}">${g.title}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+            <a class="btn btn-secondary btn-sm" href="${SALON_PHONE_TEL}">Позвонить</a>
+            <button class="btn btn-primary btn-sm" data-action="${bookAction}" data-id="${g.id}">Записаться</button>
+          </div>
+        </div>`;
+    }
+
+    function calcPrice(base) {
+      let total = base;
+      let discount = 0;
+      let note = "";
+      if (state.promo === "GROOM15") {
+        discount = Math.round(base * 0.15);
+        note = "Промокод GROOM15 −15%";
+      } else if (state.promo === "WELCOME500") {
+        discount = 500;
+        note = "Промокод WELCOME500 −500 ₽";
+      }
+      total -= discount;
+      let giftUsed = 0;
+      if (state.draft && state.draft.useGift && state.giftBalance > 0) {
+        giftUsed = Math.min(state.giftBalance, total);
+        total -= giftUsed;
+      }
+      return { total: Math.max(0, total), discount, giftUsed, note };
+    }
+
+    /* ---------- WELCOME ---------- */
+    let pendingRole = state.role || "client";
+    document.querySelectorAll(".role-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        document.querySelectorAll(".role-card").forEach((c) => c.classList.remove("selected"));
+        card.classList.add("selected");
+        pendingRole = card.dataset.role;
+      });
+    });
+    if (pendingRole === "groomer") {
+      document.querySelector('.role-card[data-role="groomer"]').classList.add("selected");
+      document.querySelector('.role-card[data-role="client"]').classList.remove("selected");
+    }
+
+    document.getElementById("enterBtn").addEventListener("click", () => {
+      state.role = pendingRole;
+      save();
+      enterApp();
+      toast(pendingRole === "client" ? "Добро пожаловать, клиент" : "Режим салона включён");
+    });
+
+    function enterApp() {
+      if (state.role === "groomer") {
+        showView("view-groomer");
+        renderGroomer();
+      } else {
+        showView("view-client");
+        renderClient();
+      }
+    }
+
+    function switchRole() {
+      state.role = state.role === "client" ? "groomer" : "client";
+      save();
+      enterApp();
+      toast(state.role === "client" ? "Переключено на клиента" : "Переключено на грумера");
+    }
+
+    ["themeWelcome", "themeClient", "themeGroomer", "themeBooking", "themePet"].forEach((id) => {
+      document.getElementById(id).addEventListener("click", () => {
+        state.theme = state.theme === "dark" ? "light" : "dark";
+        save();
+        applyTheme();
+      });
+    });
+    document.getElementById("switchRoleClient").addEventListener("click", switchRole);
+    document.getElementById("switchRoleGroomer").addEventListener("click", switchRole);
+
+    /* ---------- CLIENT ---------- */
+    const CLIENT_TABS = [
+      { id: "home", label: "Главная", icon: ICONS.home },
+      { id: "book", label: "Запись", icon: ICONS.book },
+      { id: "pets", label: "Питомцы", icon: ICONS.pets },
+      { id: "chat", label: "Чат", icon: ICONS.chat },
+      { id: "profile", label: "Профиль", icon: ICONS.profile }
+    ];
+
+    function renderClientNav() {
+      document.getElementById("clientNav").innerHTML = CLIENT_TABS.map((t) => `
+        <button type="button" data-tab="${t.id}" class="${state.clientTab === t.id ? "active" : ""}">
+          ${t.icon}<span>${t.label}</span>
+        </button>`).join("");
+      document.querySelectorAll("#clientNav button").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.clientTab = btn.dataset.tab;
+          save();
+          renderClient();
+        });
+      });
+    }
+
+    function renderClient() {
+      document.getElementById("clientGreeting").textContent = "Привет, " + state.user.client.name.split(" ")[0];
+      renderClientNav();
+      const root = document.getElementById("clientScroll");
+      if (state.clientTab === "home") root.innerHTML = clientHome();
+      if (state.clientTab === "book") root.innerHTML = clientBookHub();
+      if (state.clientTab === "pets") root.innerHTML = clientPets();
+      if (state.clientTab === "chat") root.innerHTML = clientChat();
+      if (state.clientTab === "profile") root.innerHTML = clientProfile();
+      bindClientActions(root);
+    }
+
+    function nextAppointment() {
+      return state.appointments
+        .filter((a) => a.status === "confirmed" && a.date >= todayISO())
+        .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))[0];
+    }
+
+    function upcomingAppointments() {
+      return state.appointments
+        .filter((a) => a.status === "confirmed" && a.date >= todayISO())
+        .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+    }
+
+    function statusChip(status) {
+      if (status === "confirmed") return `<span class="chip ok">Подтверждено</span>`;
+      if (status === "done") return `<span class="chip blue">Завершено</span>`;
+      if (status === "cancelled") return `<span class="chip danger">Отменено</span>`;
+      return `<span class="chip">${status}</span>`;
+    }
+
+    function cardLabel(c) {
+      return `${c.brand} •••• ${c.last4}`;
+    }
+
+    function detectCardBrand(num) {
+      const n = String(num || "").replace(/\D/g, "");
+      if (/^4/.test(n)) return "Visa";
+      if (/^(5[1-5]|2[2-7])/.test(n)) return "Mastercard";
+      if (/^2/.test(n)) return "Mir";
+      if (/^3[47]/.test(n)) return "Amex";
+      return "Card";
+    }
+
+    function formatCardNumber(raw) {
+      const digits = String(raw || "").replace(/\D/g, "").slice(0, 19);
+      return digits.replace(/(.{4})/g, "$1 ").trim();
+    }
+
+    function formatExp(raw) {
+      const digits = String(raw || "").replace(/\D/g, "").slice(0, 4);
+      if (digits.length <= 2) return digits;
+      return digits.slice(0, 2) + "/" + digits.slice(2);
+    }
+
+    function clientUpcomingList() {
+      const list = upcomingAppointments();
+      if (!list.length) {
+        return `<div class="card muted">Активных записей нет</div>`;
+      }
+      return `<div class="list">${list.map((a) => {
+        const pet = petById(a.petId);
+        const gr = groomerById(a.groomerId);
+        const label = servicesLabel(appointmentServiceIds(a));
+        return `
+          <div class="card">
+            <div class="row-between">
+              <div class="chips">${statusChip(a.status)}<span class="chip blue">${formatDate(a.date)} · ${a.time}</span></div>
+            </div>
+            <div class="row" style="margin-top:10px;border:0;padding:0;box-shadow:none">
+              <img class="pet-photo" src="${pet?.photo || DEFAULT_DOG}" alt="" />
+              <div class="meta">
+                <strong>${pet?.name || "Питомец"} · ${label}</strong>
+                <div class="tiny muted">${gr?.name || "Мастер"} · ${money(a.price)}</div>
+              </div>
+            </div>
+            <button class="btn btn-secondary btn-sm btn-block" style="margin-top:12px;color:var(--danger);border-color:rgba(226,85,85,.35)" data-action="cancel-ap" data-id="${a.id}">Отменить запись</button>
+          </div>`;
+      }).join("")}</div>`;
+    }
+
+    function clientHome() {
+      const next = nextAppointment();
+      const pet = next ? petById(next.petId) : null;
+      const nextServices = next ? servicesLabel(appointmentServiceIds(next)) : "";
+      const gr = next ? groomerById(next.groomerId) : null;
+      return `
+        <div class="hero">
+          <p class="eyebrow" style="color:#fff;opacity:.9">Ваш салон рядом</p>
+          <h1 style="font-size:1.55rem;margin-top:6px">Красота питомца без очередей</h1>
+          <p>Онлайн-запись 24/7, напоминания и оплата в пару касаний.</p>
+        </div>
+        <div class="section">
+          <div class="section-head"><h2>Ближайший визит</h2></div>
+          ${next ? `
+            <div class="card">
+              <div class="row-between">
+                <div class="chips"><span class="chip ok">Подтверждено</span><span class="chip blue">${formatDate(next.date)} · ${next.time}</span></div>
+              </div>
+              <div class="row" style="margin-top:12px;border:0;padding:0;box-shadow:none">
+                <img class="pet-photo" src="${pet.photo}" alt="${pet.name}" />
+                <div class="meta">
+                  <strong>${pet.name} · ${nextServices}</strong>
+                  <div class="tiny muted">${gr.name} · ${money(next.price)}</div>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px">
+                <button class="btn btn-secondary btn-sm" data-action="open-chat">Чат</button>
+                <button class="btn btn-primary btn-sm" data-action="rebook" data-id="${next.id}">Повторить</button>
+                <button class="btn btn-secondary btn-sm" data-action="cancel-ap" data-id="${next.id}" style="color:var(--danger);border-color:rgba(226,85,85,.35)">Отменить</button>
+              </div>
+            </div>` : `
+            <div class="card empty"><div class="emoji">🗓️</div><p>Пока нет ближайших записей</p>
+              <button class="btn btn-primary" style="margin-top:12px" data-action="start-book">Записаться</button>
+            </div>`}
+        </div>
+        <div class="section">
+          <div class="section-head"><h2>Мои записи</h2></div>
+          ${clientUpcomingList()}
+        </div>
+        <div class="section">
+          <div class="section-head"><h2>Быстрые действия</h2></div>
+          <div class="stat-grid">
+            <button class="stat" data-action="start-book"><div class="tiny muted">Онлайн-запись</div><div class="val" style="font-size:1.05rem">Новая</div></button>
+            <button class="stat" data-action="go-pets"><div class="tiny muted">Питомцы</div><div class="val" style="font-size:1.05rem">${state.pets.length}</div></button>
+            <button class="stat" data-action="go-pay"><div class="tiny muted">Сертификат</div><div class="val" style="font-size:1.05rem">${money(state.giftBalance)}</div></button>
+            <button class="stat" data-action="go-history"><div class="tiny muted">История</div><div class="val" style="font-size:1.05rem">${state.appointments.filter(a=>a.status==="done").length}</div></button>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-head"><h2>Наши мастера</h2><button class="linkish" data-action="go-book">Все</button></div>
+          <div class="stack">
+            ${GROOMERS.map((g) => masterCard(g)).join("")}
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-head"><h2>Напоминания</h2></div>
+          <div class="card row-between">
+            <div>
+              <strong>Push и SMS</strong>
+              <div class="tiny muted">За 24 часа и за 2 часа до визита</div>
+            </div>
+            <button class="chip ${state.reminders ? "ok" : "warn"}" data-action="toggle-reminders">${state.reminders ? "Вкл" : "Выкл"}</button>
+          </div>
+        </div>
+        <div class="section">
+          <div class="card">
+            <strong>Связаться с салоном</strong>
+            <div class="tiny muted" style="margin-top:4px">Санкт-Петербург · Groomly Studio</div>
+            <a class="btn btn-blue btn-block" style="margin-top:12px" href="${SALON_PHONE_TEL}">☎ ${SALON_PHONE}</a>
+          </div>
+        </div>`;
+    }
+
+    function renderServiceList(species) {
+      return servicesFor(species).map((s) => `
+        <button class="row" data-action="book-service" data-id="${s.id}">
+          <div class="meta"><strong>${s.name}</strong><div class="tiny muted">${s.desc}</div></div>
+          <span class="price" style="text-align:right;min-width:7.5ch">${servicePrice(s)}</span>
+        </button>`).join("");
+    }
+
+    function clientBookHub() {
+      return `
+        <h2>Запись</h2>
+        <p class="muted tiny" style="margin:6px 0 10px">Выберите мастера или несколько услуг сразу. Цены — средние по Санкт-Петербургу, 2026.</p>
+        <a class="phone-pill" href="${SALON_PHONE_TEL}" style="margin-bottom:14px">☎ ${SALON_PHONE}</a>
+        <button class="btn btn-primary btn-block" data-action="start-book">Новая запись</button>
+        <div class="section">
+          <div class="section-head"><h2>Специалисты</h2></div>
+          <div class="stack">
+            ${GROOMERS.map((g) => masterCard(g)).join("")}
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-head"><h2>Повторить визит</h2></div>
+          <div class="list">
+            ${state.appointments.filter(a => a.status === "done").slice(0,3).map((a) => {
+              const pet = petById(a.petId);
+              const label = servicesLabel(appointmentServiceIds(a));
+              const gr = groomerById(a.groomerId);
+              return `<button class="row" data-action="rebook" data-id="${a.id}">
+                <img class="pet-photo" src="${pet.photo}" alt="" />
+                <div class="meta"><strong>${label || "Услуги"}</strong><div class="tiny muted">${pet.name} · ${gr?.name || ""} · ${formatDate(a.date)}</div></div>
+                <span class="price">${money(a.price)}</span>
+              </button>`;
+            }).join("")}
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-head"><h2>Для собак</h2></div>
+          <div class="list">${renderServiceList("dog")}</div>
+        </div>
+        <div class="section">
+          <div class="section-head"><h2>Для кошек</h2></div>
+          <div class="list">${renderServiceList("cat")}</div>
+        </div>`;
+    }
+
+    function clientPets() {
+      return `
+        <div class="section-head">
+          <h2>Питомцы</h2>
+          <button class="linkish" data-action="add-pet">+ Добавить</button>
+        </div>
+        <div class="list">
+          ${state.pets.map((p) => `
+            <button class="row" data-action="edit-pet" data-id="${p.id}">
+              <img class="pet-photo" src="${p.photo}" alt="${p.name}" />
+              <div class="meta">
+                <strong>${p.name}</strong>
+                <div class="tiny muted">${p.type === "dog" ? "Собака" : "Кошка"} · ${p.breed} · ${p.age}</div>
+              </div>
+              <span class="chip ${p.type === "dog" ? "" : "blue"}">${p.customPhoto ? "Своё фото" : "Дефолт"}</span>
+            </button>`).join("")}
+        </div>
+        <p class="tiny muted" style="margin-top:14px">Для собак по умолчанию — корги, для кошек — мейн-кун. Можно заменить своим фото.</p>`;
+    }
+
+    function clientChat() {
+      return `
+        <div class="card" style="padding:12px;margin-bottom:12px">
+          <div class="row" style="border:0;padding:0;box-shadow:none">
+            <img class="avatar sm" src="${GROOMERS[0].avatar}" alt="" />
+            <div class="meta"><strong>Groomly Studio</strong><div class="tiny muted">Обычно отвечает за 5 минут</div></div>
+            <span class="chip ok">Онлайн</span>
+          </div>
+        </div>
+        <div class="chat" id="chatThread">
+          ${state.chat.map((m) => `
+            <div class="bubble ${m.from === "me" ? "me" : "them"}">${escapeHtml(m.text)}<span class="time">${m.time}</span></div>
+          `).join("")}
+        </div>
+        <div class="composer" style="margin:12px -18px -18px;border-radius:18px 18px 0 0">
+          <input id="chatInput" placeholder="Сообщение салону..." />
+          <button class="send" data-action="send-chat" aria-label="Отправить">➤</button>
+        </div>`;
+    }
+
+    function clientProfile() {
+      return `
+        <div class="card">
+          <strong>${state.user.client.name}</strong>
+          <div class="tiny muted" style="margin-top:4px">${state.user.client.phone}<br>${state.user.client.email}</div>
+        </div>
+        <div class="card" style="margin-top:10px">
+          <strong>Салон Groomly · СПб</strong>
+          <div class="tiny muted" style="margin-top:4px">Запись и вопросы</div>
+          <a class="btn btn-blue btn-block" style="margin-top:12px" href="${SALON_PHONE_TEL}">☎ ${SALON_PHONE}</a>
+        </div>
+        <div class="section">
+          <div class="section-head"><h2>Оплата</h2><button class="linkish" data-action="add-card">+ Карта</button></div>
+          ${state.cards.length ? state.cards.map((c, i) => `
+            <div class="card" style="${i ? "margin-top:10px" : ""}">
+              <div class="row-between">
+                <div>
+                  <strong>${cardLabel(c)}</strong>
+                  <div class="tiny muted">${c.holder ? escapeHtml(c.holder) + " · " : ""}до ${c.exp}</div>
+                </div>
+                <span class="chip ${i === 0 ? "ok" : "blue"}">${i === 0 ? "Основная" : "Карта"}</span>
+              </div>
+              <button class="btn btn-secondary btn-sm btn-block" style="margin-top:12px;color:var(--danger);border-color:rgba(226,85,85,.35)" data-action="delete-card" data-id="${c.id}">Удалить карту</button>
+            </div>`).join("") : `<div class="card muted">Нет привязанных карт<br><button class="btn btn-primary btn-sm" style="margin-top:12px" data-action="add-card">Привязать карту</button></div>`}
+          <div class="card" style="margin-top:10px">
+            <div class="row-between"><span class="muted">Подарочный сертификат</span><strong>${money(state.giftBalance)}</strong></div>
+            <div class="divider"></div>
+            <div class="field" style="margin:0">
+              <label>Промокод</label>
+              <div style="display:flex;gap:8px">
+                <input id="promoInput" placeholder="GROOM15" value="${state.promo || ""}" />
+                <button class="btn btn-secondary btn-sm" data-action="apply-promo">Ок</button>
+              </div>
+            </div>
+            ${state.promo ? `<p class="tiny" style="margin-top:8px;color:var(--ok)">Активен: ${state.promo}</p>` : `<p class="tiny muted" style="margin-top:8px">Попробуйте GROOM15 или WELCOME500</p>`}
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-head"><h2>История платежей</h2></div>
+          <div class="list">
+            ${state.payments.map((p) => `
+              <div class="card">
+                <div class="row-between"><strong>${p.title}</strong><span class="price">${money(p.amount + p.tip)}</span></div>
+                <div class="tiny muted" style="margin-top:4px">${formatDate(p.date)} · ${p.method}${p.tip ? " · чаевые " + money(p.tip) : ""}</div>
+              </div>`).join("")}
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-head"><h2>История визитов</h2></div>
+          ${state.appointments.filter((a) => a.status === "done" || a.status === "cancelled").map((a) => {
+            const pet = petById(a.petId);
+            const label = servicesLabel(appointmentServiceIds(a));
+            return `
+              <div class="card">
+                <div class="chips" style="margin-bottom:10px">${statusChip(a.status)}</div>
+                <div class="row" style="border:0;padding:0;box-shadow:none">
+                  <img class="pet-photo" src="${pet.photo}" alt="" />
+                  <div class="meta">
+                    <strong>${label}</strong>
+                    <div class="tiny muted">${pet.name} · ${formatDate(a.date)} · ${money(a.price)}</div>
+                  </div>
+                </div>
+                ${a.before && a.after ? `
+                  <div class="photo-pair" style="margin-top:12px">
+                    <figure><img src="${a.before}" alt="До" /><figcaption>До</figcaption></figure>
+                    <figure><img src="${a.after}" alt="После" /><figcaption>После</figcaption></figure>
+                  </div>` : ""}
+                ${a.status === "done" ? `<button class="btn btn-secondary btn-sm btn-block" style="margin-top:12px" data-action="leave-review" data-id="${a.id}">Оставить отзыв</button>` : ""}
+              </div>`;
+          }).join("") || `<div class="card muted">Пока нет истории</div>`}
+        </div>
+        <div class="section">
+          <div class="section-head"><h2>Ваши отзывы</h2></div>
+          ${state.reviews.map((r) => `
+            <div class="card">
+              <div class="stars">${"★".repeat(r.stars)}${"☆".repeat(5 - r.stars)}</div>
+              <strong style="display:block;margin-top:6px">${r.pet}</strong>
+              <p class="tiny muted" style="margin-top:4px">${escapeHtml(r.text)}</p>
+            </div>`).join("") || `<div class="card muted">Пока нет отзывов</div>`}
+        </div>`;
+    }
+
+    function bindClientActions(root) {
+      root.querySelectorAll("[data-action]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const action = el.dataset.action;
+          if (action === "start-book") startBooking();
+          if (action === "book-service") startBooking({ serviceIds: [el.dataset.id] });
+          if (action === "book-master") startBooking({ groomerId: el.dataset.id });
+          if (action === "go-book") { state.clientTab = "book"; save(); renderClient(); }
+          if (action === "rebook") {
+            const ap = state.appointments.find((a) => a.id === el.dataset.id);
+            if (ap) startBooking({ serviceIds: appointmentServiceIds(ap), groomerId: ap.groomerId, petId: ap.petId });
+          }
+          if (action === "go-pets") { state.clientTab = "pets"; save(); renderClient(); }
+          if (action === "go-pay" || action === "go-history") { state.clientTab = "profile"; save(); renderClient(); }
+          if (action === "open-chat") { state.clientTab = "chat"; save(); renderClient(); }
+          if (action === "toggle-reminders") {
+            state.reminders = !state.reminders; save(); renderClient();
+            toast(state.reminders ? "Напоминания включены" : "Напоминания выключены");
+          }
+          if (action === "add-pet") openPetEditor();
+          if (action === "edit-pet") openPetEditor(el.dataset.id);
+          if (action === "send-chat") sendChat();
+          if (action === "apply-promo") {
+            const code = (document.getElementById("promoInput").value || "").trim().toUpperCase();
+            if (["GROOM15", "WELCOME500"].includes(code)) {
+              state.promo = code; save(); renderClient(); toast("Промокод применён");
+            } else toast("Неизвестный промокод");
+          }
+          if (action === "add-card") openAddCard();
+          if (action === "delete-card") confirmDeleteCard(el.dataset.id);
+          if (action === "cancel-ap") confirmCancelAppointment(el.dataset.id);
+          if (action === "leave-review") openReview(el.dataset.id);
+        });
+      });
+      const input = document.getElementById("chatInput");
+      if (input) input.addEventListener("keydown", (e) => { if (e.key === "Enter") sendChat(); });
+    }
+
+    function sendChat() {
+      const input = document.getElementById("chatInput");
+      const text = (input?.value || "").trim();
+      if (!text) return;
+      const now = new Date();
+      const time = now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+      state.chat.push({ id: Date.now(), from: "me", text, time });
+      save();
+      renderClient();
+      setTimeout(() => {
+        state.chat.push({ id: Date.now() + 1, from: "salon", text: "Приняли! Если нужно перенести визит — напишите удобное время.", time });
+        save();
+        if (state.clientTab === "chat" && state.role === "client") renderClient();
+      }, 900);
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+    }
+
+    /* ---------- BOOKING ---------- */
+    function startBooking(seed = {}) {
+      const serviceIds = Array.isArray(seed.serviceIds)
+        ? seed.serviceIds.filter((id) => serviceById(id))
+        : (seed.serviceId && serviceById(seed.serviceId) ? [seed.serviceId] : []);
+      const species = serviceIds[0] ? serviceById(serviceIds[0]).species : null;
+      let petId = seed.petId || null;
+      if (species) {
+        const match = state.pets.find((p) => p.type === species);
+        if (!petId || (petById(petId)?.type !== species)) petId = match?.id || null;
+      } else if (!petId) {
+        petId = state.pets[0]?.id || null;
+      }
+      const startDate = addDaysISO(1);
+      state.draft = {
+        step: 0,
+        serviceIds,
+        groomerId: seed.groomerId || null,
+        groomerLocked: Boolean(seed.groomerId),
+        date: startDate,
+        calMonth: startDate.slice(0, 7),
+        time: null,
+        petId,
+        tip: 0,
+        useGift: false,
+        note: ""
+      };
+      save();
+      showView("view-booking");
+      renderBooking();
+    }
+
+    document.getElementById("bookingBack").addEventListener("click", () => {
+      if (!state.draft) return enterApp();
+      if (state.draft.step === 0) {
+        state.draft = null; save(); enterApp();
+      } else {
+        // Если мастер зафиксирован с карточки — пропускаем шаг специалиста
+        if (state.draft.step === 2 && state.draft.groomerLocked) state.draft.step = 0;
+        else state.draft.step -= 1;
+        save(); renderBooking();
+      }
+    });
+
+    function renderBooking() {
+      const d = state.draft;
+      if (!d) return;
+      document.getElementById("bookSteps").innerHTML = [0,1,2,3,4].map((i) => `<span class="${i <= d.step ? "on" : ""}"></span>`).join("");
+      const root = document.getElementById("bookingScroll");
+      const titles = ["Услуги", "Грумер", "Время", "Питомец", "Оплата"];
+      let body = `<p class="eyebrow">Шаг ${d.step + 1} из 5</p><h2 style="margin:6px 0 14px">${titles[d.step]}</h2>`;
+
+      if (d.step === 0) {
+        const selected = draftServiceList(d);
+        const base = draftBaseTotal(d);
+        const renderGroup = (species, title) => `
+          <div class="section-head" style="margin-top:${species === "dog" ? "0" : "16"}px"><h3>${title}</h3></div>
+          <div class="list">${servicesFor(species).map((s) => `
+            <button class="row ${(d.serviceIds || []).includes(s.id) ? "selected" : ""}" data-pick="service" data-id="${s.id}">
+              <div class="meta">
+                <strong>${(d.serviceIds || []).includes(s.id) ? "✓ " : ""}${s.name}</strong>
+                <div class="tiny muted">${s.desc}</div>
+              </div>
+              <span class="price" style="text-align:right">${servicePrice(s)}</span>
+            </button>`).join("")}</div>`;
+        body += `<p class="tiny muted" style="margin-bottom:10px">Можно отметить несколько услуг — сумма сложится автоматически. Услуги только для собак или только для кошек. Ориентиры по СПб, 2026.</p>`;
+        if (d.groomerId) {
+          const g = groomerById(d.groomerId);
+          body += `<div class="card" style="margin-bottom:12px"><div class="tiny muted">Мастер</div><strong>${g.name}</strong> · ${g.title}</div>`;
+        }
+        if (selected.length) {
+          body += `<div class="card" style="margin-bottom:12px">
+            <div class="tiny muted">Выбрано: ${selected.length}</div>
+            <strong style="display:block;margin-top:4px">${selected.map((s) => s.name).join(" + ")}</strong>
+            <div class="row-between" style="margin-top:8px"><span class="muted">Сумма от</span><span class="price">${money(base)}</span></div>
+          </div>`;
+        }
+        body += renderGroup("dog", "🐕 Для собак") + renderGroup("cat", "🐈 Для кошек");
+      }
+      if (d.step === 1) {
+        body += `<p class="tiny muted" style="margin-bottom:10px">Выберите специалиста. С карточки мастера на главной можно записаться сразу к нему.</p>`;
+        body += `<div class="list">${GROOMERS.map((g) => `
+          <button class="row ${d.groomerId === g.id ? "selected" : ""}" data-pick="groomer" data-id="${g.id}">
+            <img class="avatar" src="${g.avatar}" alt="" />
+            <div class="meta"><strong>${g.name}</strong><div class="tiny muted">${g.title} · ${g.specialty}</div></div>
+            <span class="stars">★ ${g.rating}</span>
+          </button>`).join("")}</div>`;
+      }
+      if (d.step === 2) {
+        const g = groomerById(d.groomerId) || GROOMERS[0];
+        if (!d.groomerId) d.groomerId = g.id;
+        ensureCalMonth(d);
+        const slots = masterDaySlots(g);
+        if (d.time && isSlotBusy(g.id, d.date, d.time)) d.time = null;
+        body += `
+          <p class="tiny muted" style="margin-bottom:10px">Мастер: <strong>${g.name}</strong>. Выберите день в календаре, затем свободное время.</p>
+          ${renderMonthCalendar(d)}
+          <div class="slot-legend">
+            <span><i class="lg-free"></i>свободно</span>
+            <span><i class="lg-busy"></i>занято</span>
+          </div>
+          <p class="tiny muted" style="margin-bottom:8px">${formatDate(d.date)} · расписание ${g.name}</p>
+          <div class="slots">
+            ${slots.map((t) => {
+              const busy = isSlotBusy(g.id, d.date, t);
+              const selected = d.time === t && !busy;
+              return `<button class="slot ${busy ? "busy" : "free"} ${selected ? "selected" : ""}" data-pick="time" data-id="${t}" ${busy ? "disabled" : ""}>${t}</button>`;
+            }).join("")}
+          </div>`;
+      }
+      if (d.step === 3) {
+        const species = draftSpecies(d);
+        const pets = state.pets.filter((p) => !species || p.type === species);
+        const base = draftBaseTotal(d);
+        body += `<p class="tiny muted" style="margin-bottom:10px">${species ? `Услуги для ${species === "dog" ? "собак" : "кошек"} · от ${money(base)}` : "Выберите питомца"}</p>`;
+        body += `<div class="list">${(pets.length ? pets : state.pets).map((p) => `
+          <button class="row ${d.petId === p.id ? "selected" : ""}" data-pick="pet" data-id="${p.id}">
+            <img class="pet-photo" src="${p.photo}" alt="" />
+            <div class="meta"><strong>${p.name}</strong><div class="tiny muted">${p.type === "dog" ? "Собака" : "Кошка"} · ${p.breed}</div></div>
+          </button>`).join("")}</div>
+          <button class="btn btn-secondary btn-block" style="margin-top:12px" data-action="add-pet-from-book">+ Новый питомец</button>`;
+      }
+      if (d.step === 4) {
+        const selected = draftServiceList(d);
+        const base = draftBaseTotal(d);
+        const priced = calcPrice(base);
+        body += `
+          <div class="card">
+            <div class="row" style="border:0;padding:0;box-shadow:none">
+              <img class="pet-photo" src="${petById(d.petId).photo}" alt="" />
+              <div class="meta">
+                <strong>${selected.map((s) => s.name).join(" + ")}</strong>
+                <div class="tiny muted">${petById(d.petId).name} · ${formatDate(d.date)} · ${d.time}</div>
+                <div class="tiny muted">${groomerById(d.groomerId).name}</div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            ${selected.map((s) => `<div class="row-between" style="margin-top:6px"><span class="muted">${s.name}</span><span>${money(s.price)}</span></div>`).join("")}
+            <div class="row-between" style="margin-top:8px"><span class="muted">Подытог</span><span>${money(base)}</span></div>
+            ${priced.discount ? `<div class="row-between" style="margin-top:6px"><span class="muted">${priced.note}</span><span>-${money(priced.discount)}</span></div>` : ""}
+            ${priced.giftUsed ? `<div class="row-between" style="margin-top:6px"><span class="muted">Сертификат</span><span>-${money(priced.giftUsed)}</span></div>` : ""}
+            <div class="row-between" style="margin-top:8px"><strong>Итого</strong><strong class="price">${money(priced.total + d.tip)}</strong></div>
+          </div>
+          <div class="section">
+            <h3 style="margin-bottom:8px">Чаевые</h3>
+            <div class="chips">
+              ${[0,200,400,700].map((t) => `<button class="chip ${d.tip === t ? "ok" : ""}" data-pick="tip" data-id="${t}">${t ? money(t) : "Без чаевых"}</button>`).join("")}
+            </div>
+          </div>
+          <div class="card" style="margin-top:12px">
+            <label class="row-between" style="cursor:pointer">
+              <span><strong>Списать сертификат</strong><div class="tiny muted">Доступно ${money(state.giftBalance)}</div></span>
+              <input type="checkbox" id="useGift" ${d.useGift ? "checked" : ""} style="width:20px;height:20px" />
+            </label>
+            <div class="divider"></div>
+            <div class="field" style="margin:0">
+              <label>Промокод</label>
+              <div style="display:flex;gap:8px">
+                <input id="bookPromo" value="${state.promo || ""}" placeholder="GROOM15" />
+                <button class="btn btn-secondary btn-sm" data-action="book-promo">Ок</button>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div class="tiny muted">Оплата картой ${state.cards[0] ? cardLabel(state.cards[0]) : "будет предложена"}</div>
+          </div>`;
+      }
+
+      body += `<button class="btn btn-primary btn-block" style="margin-top:18px" data-action="next-step">${d.step === 4 ? "Оплатить и записаться" : "Продолжить"}</button>`;
+      root.innerHTML = body;
+
+      root.querySelectorAll("[data-pick]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const kind = el.dataset.pick;
+          const id = el.dataset.id;
+          if (kind === "service") {
+            const svc = serviceById(id);
+            if (!svc) return;
+            const ids = state.draft.serviceIds || [];
+            if (ids.includes(id)) {
+              state.draft.serviceIds = ids.filter((x) => x !== id);
+            } else {
+              const first = ids[0] ? serviceById(ids[0]) : null;
+              if (first && first.species !== svc.species) {
+                toast("Выберите услуги одного типа: только для собак или только для кошек");
+                return;
+              }
+              state.draft.serviceIds = [...ids, id];
+            }
+            syncPetToSpecies(draftSpecies(state.draft));
+          }
+          if (kind === "groomer") {
+            state.draft.groomerId = id;
+            state.draft.time = null; // у другого мастера занятость другая
+          }
+          if (kind === "date") {
+            state.draft.date = id;
+            const [y, m] = id.split("-");
+            state.draft.calMonth = `${y}-${m}`;
+            const gId = state.draft.groomerId;
+            if (state.draft.time && gId && isSlotBusy(gId, id, state.draft.time)) {
+              state.draft.time = null;
+            }
+          }
+          if (kind === "time") {
+            const gId = state.draft.groomerId;
+            if (gId && isSlotBusy(gId, state.draft.date, id)) {
+              toast("Это время уже занято");
+              return;
+            }
+            state.draft.time = id;
+          }
+          if (kind === "pet") state.draft.petId = id;
+          if (kind === "tip") state.draft.tip = Number(id);
+          save();
+          renderBooking();
+        });
+      });
+
+      const gift = document.getElementById("useGift");
+      if (gift) gift.addEventListener("change", () => {
+        state.draft.useGift = gift.checked; save(); renderBooking();
+      });
+
+      root.querySelectorAll("[data-action]").forEach((el) => {
+        el.addEventListener("click", () => {
+          if (el.dataset.action === "next-step") nextBookStep();
+          if (el.dataset.action === "book-promo") {
+            const code = (document.getElementById("bookPromo").value || "").trim().toUpperCase();
+            if (["GROOM15", "WELCOME500"].includes(code)) {
+              state.promo = code; save(); renderBooking(); toast("Промокод применён");
+            } else toast("Неизвестный промокод");
+          }
+          if (el.dataset.action === "add-pet-from-book") openPetEditor(null, true);
+        });
+      });
+
+      root.querySelectorAll("[data-cal]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const dir = el.dataset.cal;
+          ensureCalMonth(state.draft);
+          state.draft.calMonth = shiftMonth(state.draft.calMonth, dir === "next" ? 1 : -1);
+          save();
+          renderBooking();
+        });
+      });
+    }
+
+    function nextBookStep() {
+      const d = state.draft;
+      if (d.step === 0 && !(d.serviceIds && d.serviceIds.length)) return toast("Выберите хотя бы одну услугу");
+      if (d.step === 1 && !d.groomerId) return toast("Выберите грумера");
+      if (d.step === 2) {
+        if (!d.date) return toast("Выберите дату");
+        if (!d.time) return toast("Выберите свободное время");
+        if (isSlotBusy(d.groomerId, d.date, d.time)) return toast("Это время уже занято");
+      }
+      if (d.step === 3 && !d.petId) return toast("Выберите питомца");
+      if (d.step === 3) {
+        const species = draftSpecies(d);
+        const petCheck = petById(d.petId);
+        if (species && petCheck && species !== petCheck.type) return toast("Эти услуги не подходят для выбранного питомца");
+      }
+      if (d.step < 4) {
+        if (d.step === 0 && d.groomerLocked) d.step = 2;
+        else d.step += 1;
+        save(); renderBooking(); return;
+      }
+      const selected = draftServiceList(d);
+      const base = draftBaseTotal(d);
+      const priced = calcPrice(base);
+      if (priced.giftUsed) state.giftBalance -= priced.giftUsed;
+      const label = selected.map((s) => s.name).join(" + ");
+      const ap = {
+        id: uid("ap"),
+        date: d.date,
+        time: d.time,
+        serviceIds: [...d.serviceIds],
+        serviceId: d.serviceIds[0],
+        groomerId: d.groomerId,
+        petId: d.petId,
+        status: "confirmed",
+        price: priced.total,
+        tip: d.tip,
+        paid: true
+      };
+      state.appointments.unshift(ap);
+      state.payments.unshift({
+        id: uid("pay"),
+        title: `${label} · ${petById(d.petId).name}`,
+        amount: priced.total,
+        tip: d.tip,
+        date: todayISO(),
+        method: state.cards[0] ? cardLabel(state.cards[0]) : "Карта"
+      });
+      state.draft = null;
+      state.clientTab = "home";
+      save();
+      enterApp();
+      toast("Запись оплачена и подтверждена");
+    }
+
+    /* ---------- PET EDITOR ---------- */
+    let petEditId = null;
+    let returnToBooking = false;
+
+    function openPetEditor(id = null, fromBooking = false) {
+      petEditId = id;
+      returnToBooking = fromBooking;
+      showView("view-pet-edit");
+      renderPetEditor();
+    }
+
+    document.getElementById("petEditBack").addEventListener("click", () => {
+      if (returnToBooking && state.draft) {
+        showView("view-booking");
+        renderBooking();
+      } else {
+        enterApp();
+        if (state.role === "client") {
+          state.clientTab = "pets";
+          renderClient();
+        }
+      }
+    });
+
+    function renderPetEditor() {
+      const pet = petEditId ? petById(petEditId) : {
+        name: "", type: "dog", breed: "Корги", age: "", notes: "", photo: DEFAULT_DOG, customPhoto: false
+      };
+      const root = document.getElementById("petEditScroll");
+      root.innerHTML = `
+        <p class="eyebrow">${petEditId ? "Профиль питомца" : "Новый питомец"}</p>
+        <h2 style="margin:6px 0 14px">${pet.name || "Добавить питомца"}</h2>
+        <div class="pet-hero">
+          <img class="pet-photo" id="petPreview" src="${pet.photo}" alt="" />
+          <div class="chips">
+            <label class="btn btn-secondary btn-sm upload-btn">Загрузить фото<input type="file" id="petFile" accept="image/*" /></label>
+            <button class="btn btn-ghost btn-sm" id="resetPhoto" type="button">Сбросить</button>
+          </div>
+          <p class="tiny muted">Собака → корги · Кошка → мейн-кун</p>
+        </div>
+        <div class="field"><label>Имя</label><input id="petName" value="${escapeHtml(pet.name)}" placeholder="Рекс" /></div>
+        <div class="field"><label>Тип</label>
+          <select id="petType">
+            <option value="dog" ${pet.type === "dog" ? "selected" : ""}>Собака</option>
+            <option value="cat" ${pet.type === "cat" ? "selected" : ""}>Кошка</option>
+          </select>
+        </div>
+        <div class="field"><label>Порода</label><input id="petBreed" value="${escapeHtml(pet.breed)}" /></div>
+        <div class="field"><label>Возраст</label><input id="petAge" value="${escapeHtml(pet.age)}" placeholder="3 года" /></div>
+        <div class="field"><label>Заметки</label><textarea id="petNotes">${escapeHtml(pet.notes || "")}</textarea></div>
+        <button class="btn btn-primary btn-block" id="savePet">Сохранить</button>
+      `;
+
+      let customPhoto = pet.customPhoto;
+      let photo = pet.photo;
+
+      const syncDefault = () => {
+        if (!customPhoto) {
+          photo = defaultPhoto(document.getElementById("petType").value);
+          document.getElementById("petPreview").src = photo;
+          const type = document.getElementById("petType").value;
+          if (!document.getElementById("petBreed").value || ["Корги","Мейн-кун"].includes(document.getElementById("petBreed").value)) {
+            document.getElementById("petBreed").value = type === "cat" ? "Мейн-кун" : "Корги";
+          }
+        }
+      };
+
+      document.getElementById("petType").addEventListener("change", syncDefault);
+      document.getElementById("resetPhoto").addEventListener("click", () => {
+        customPhoto = false;
+        syncDefault();
+        toast("Возвращено дефолтное фото");
+      });
+      document.getElementById("petFile").addEventListener("change", (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+        if (!allowed.includes(file.type)) {
+          toast("Можно только изображения JPG/PNG/WebP/GIF");
+          e.target.value = "";
+          return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+          toast("Файл слишком большой (макс. 2 МБ)");
+          e.target.value = "";
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+          photo = reader.result;
+          customPhoto = true;
+          document.getElementById("petPreview").src = photo;
+        };
+        reader.readAsDataURL(file);
+      });
+      document.getElementById("savePet").addEventListener("click", () => {
+        const name = document.getElementById("petName").value.trim();
+        if (!name) return toast("Введите имя питомца");
+        const payload = {
+          id: petEditId || uid("pet"),
+          name,
+          type: document.getElementById("petType").value,
+          breed: document.getElementById("petBreed").value.trim() || (document.getElementById("petType").value === "cat" ? "Мейн-кун" : "Корги"),
+          age: document.getElementById("petAge").value.trim() || "—",
+          notes: document.getElementById("petNotes").value.trim(),
+          photo,
+          customPhoto
+        };
+        if (petEditId) {
+          const idx = state.pets.findIndex((p) => p.id === petEditId);
+          state.pets[idx] = payload;
+        } else {
+          state.pets.push(payload);
+          if (state.draft) state.draft.petId = payload.id;
+        }
+        save();
+        toast("Питомец сохранён");
+        if (returnToBooking && state.draft) {
+          showView("view-booking");
+          renderBooking();
+        } else {
+          state.clientTab = "pets";
+          enterApp();
+        }
+      });
+    }
+
+    /* ---------- GROOMER ---------- */
+    const GROOMER_TABS = [
+      { id: "today", label: "Сегодня", icon: ICONS.today },
+      { id: "calendar", label: "Календарь", icon: ICONS.book },
+      { id: "clients", label: "Клиенты", icon: ICONS.clients },
+      { id: "chat", label: "Чат", icon: ICONS.chat },
+      { id: "more", label: "Ещё", icon: ICONS.more }
+    ];
+
+    function renderGroomerNav() {
+      document.getElementById("groomerNav").innerHTML = GROOMER_TABS.map((t) => `
+        <button type="button" data-tab="${t.id}" class="${state.groomerTab === t.id ? "active" : ""}">
+          ${t.icon}<span>${t.label}</span>
+        </button>`).join("");
+      document.querySelectorAll("#groomerNav button").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.groomerTab = btn.dataset.tab;
+          save();
+          renderGroomer();
+        });
+      });
+    }
+
+    function renderGroomer() {
+      document.getElementById("groomerGreeting").textContent = state.user.groomer.salon;
+      renderGroomerNav();
+      const root = document.getElementById("groomerScroll");
+      if (state.groomerTab === "today") root.innerHTML = groomerToday();
+      if (state.groomerTab === "calendar") root.innerHTML = groomerCalendar();
+      if (state.groomerTab === "clients") root.innerHTML = groomerClients();
+      if (state.groomerTab === "chat") root.innerHTML = groomerChat();
+      if (state.groomerTab === "more") root.innerHTML = groomerMore();
+      bindGroomerActions(root);
+    }
+
+    function dayAppointments(iso) {
+      return state.appointments
+        .filter((a) => a.date === iso)
+        .sort((a, b) => a.time.localeCompare(b.time));
+    }
+
+    function groomerToday() {
+      const list = dayAppointments(todayISO());
+      const revenue = state.payments.reduce((s, p) => s + p.amount + p.tip, 0);
+      return `
+        <div class="hero" style="background:linear-gradient(135deg,#29B6F6,#4FC3F7 55%,#FF7A3D)">
+          <p class="eyebrow" style="color:#fff;opacity:.9">Groomly Pro</p>
+          <h1 style="font-size:1.45rem;margin-top:6px">День под контролем</h1>
+          <p>Заявки, визиты и платежи — без лишнего шума.</p>
+        </div>
+        <div class="section stat-grid">
+          <div class="stat"><div class="tiny muted">Сегодня</div><div class="val">${list.length}</div></div>
+          <div class="stat"><div class="tiny muted">Заявки</div><div class="val">${state.requests.length}</div></div>
+          <div class="stat"><div class="tiny muted">Выручка</div><div class="val" style="font-size:1.15rem">${money(revenue)}</div></div>
+          <div class="stat"><div class="tiny muted">Рейтинг</div><div class="val">4.9</div></div>
+        </div>
+        <div class="section">
+          <div class="section-head"><h2>Новые заявки</h2></div>
+          ${state.requests.length ? state.requests.map((r) => `
+            <div class="card">
+              <div class="chips"><span class="chip warn">На одобрение</span><span class="chip blue">${formatDate(r.date)} · ${r.time}</span></div>
+              <strong style="display:block;margin-top:10px">${r.client}</strong>
+              <div class="tiny muted">${r.pet} · ${r.service}</div>
+              <p class="tiny" style="margin-top:8px">${escapeHtml(r.note)}</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+                <button class="btn btn-secondary btn-sm" data-action="decline-req" data-id="${r.id}">Отклонить</button>
+                <button class="btn btn-primary btn-sm" data-action="approve-req" data-id="${r.id}">Одобрить</button>
+              </div>
+            </div>`).join("") : `<div class="card muted">Новых заявок нет</div>`}
+        </div>
+        <div class="section">
+          <div class="section-head"><h2>Расписание на сегодня</h2></div>
+          ${list.length ? list.map((a) => {
+            const pet = petById(a.petId);
+            const label = servicesLabel(appointmentServiceIds(a));
+            return `<div class="card">
+              <div class="row-between"><strong>${a.time}</strong>${a.status === "cancelled" ? statusChip("cancelled") : a.status === "confirmed" ? `<span class="chip ok">Ждёт</span>` : statusChip(a.status)}</div>
+              <div class="row" style="margin-top:10px;border:0;padding:0;box-shadow:none;${a.status === "cancelled" ? "opacity:.72" : ""}">
+                <img class="pet-photo" src="${pet?.photo || DEFAULT_DOG}" alt="" />
+                <div class="meta"><strong>${pet?.name || "Питомец"} · ${label}</strong><div class="tiny muted">${money(a.price)}${a.status === "cancelled" ? " · отменено клиентом" : ""}</div></div>
+              </div>
+            </div>`;
+          }).join("") : `<div class="card empty"><div class="emoji">☀️</div>Свободный день — можно разобрать заявки</div>`}
+        </div>`;
+    }
+
+    function groomerCalendar() {
+      const base = new Date();
+      const year = base.getFullYear();
+      const month = base.getMonth();
+      const first = new Date(year, month, 1);
+      const startPad = (first.getDay() + 6) % 7;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const cells = [];
+      for (let i = 0; i < startPad; i++) cells.push({ mute: true, label: "" });
+      for (let d = 1; d <= daysInMonth; d++) {
+        const iso = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+        cells.push({
+          mute: false,
+          label: d,
+          iso,
+          has: state.appointments.some((a) => a.date === iso),
+          selected: state.selectedDay === iso
+        });
+      }
+      const list = dayAppointments(state.selectedDay);
+      return `
+        <h2>${base.toLocaleDateString("ru-RU", { month: "long", year: "numeric" })}</h2>
+        <div class="calendar" style="margin-top:12px">
+          ${["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map((d) => `<div class="tiny muted" style="text-align:center;font-weight:700">${d}</div>`).join("")}
+          ${cells.map((c) => c.mute
+            ? `<div class="day muted"></div>`
+            : `<button class="day ${c.has ? "has" : ""} ${c.selected ? "selected" : ""}" data-action="pick-day" data-id="${c.iso}">${c.label}</button>`
+          ).join("")}
+        </div>
+        <div class="section">
+          <div class="section-head"><h2>${formatDate(state.selectedDay)}</h2></div>
+          ${list.length ? list.map((a) => {
+            const pet = petById(a.petId);
+            const label = servicesLabel(appointmentServiceIds(a));
+            return `<div class="card row-between" style="${a.status === "cancelled" ? "opacity:.78" : ""}">
+              <div><strong>${a.time} · ${label}</strong><div class="tiny muted">${pet?.name || ""} · ${money(a.price)}${a.status === "cancelled" ? " · клиент отменил" : ""}</div></div>
+              ${statusChip(a.status === "confirmed" ? "confirmed" : a.status)}
+            </div>`;
+          }).join("") : `<div class="card muted">Нет записей на этот день</div>`}
+        </div>`;
+    }
+
+    function groomerClients() {
+      return `
+        <div class="section-head"><h2>Клиенты и питомцы</h2></div>
+        <div class="list">
+          ${state.clients.map((c) => `
+            <div class="card">
+              <div class="row-between">
+                <div>
+                  <strong>${c.name}</strong>
+                  <div class="tiny muted">${c.phone}</div>
+                  <div class="tiny muted" style="margin-top:4px">Питомцы: ${c.pets}</div>
+                </div>
+                <span class="chip ${c.visits ? "ok" : "warn"}">${c.visits ? c.visits + " визитов" : "Новый"}</span>
+              </div>
+              <button class="btn btn-secondary btn-sm" style="margin-top:10px" data-action="message-client" data-name="${escapeHtml(c.name)}">Написать</button>
+            </div>`).join("")}
+        </div>
+        <div class="section">
+          <div class="section-head"><h2>Питомцы в базе</h2></div>
+          ${state.pets.map((p) => `
+            <div class="row" style="pointer-events:none">
+              <img class="pet-photo" src="${p.photo}" alt="" />
+              <div class="meta"><strong>${p.name}</strong><div class="tiny muted">${p.type === "dog" ? "Собака" : "Кошка"} · ${p.breed}</div></div>
+            </div>`).join("")}
+        </div>`;
+    }
+
+    function groomerChat() {
+      return `
+        <div class="card" style="margin-bottom:12px">
+          <strong>Чат с Марией Соколовой</strong>
+          <div class="tiny muted">Двусторонняя переписка без лимитов</div>
+        </div>
+        <div class="chat">
+          ${state.chat.map((m) => `
+            <div class="bubble ${m.from === "salon" ? "me" : "them"}">${escapeHtml(m.text)}<span class="time">${m.time}</span></div>
+          `).join("")}
+        </div>
+        <div class="composer" style="margin:12px -18px -18px;border-radius:18px 18px 0 0">
+          <input id="gChatInput" placeholder="Ответ клиенту..." />
+          <button class="send" data-action="g-send">➤</button>
+        </div>`;
+    }
+
+    function groomerMore() {
+      const week = [4200, 6100, 3800, 7200, 5400, 8100, 4600];
+      const max = Math.max(...week);
+      return `
+        <div class="section-head"><h2>Аналитика</h2></div>
+        <div class="card">
+          <div class="tiny muted">Выручка за 7 дней</div>
+          <div class="chart" style="margin-top:18px">
+            ${week.map((v, i) => `<div class="bar" style="height:${Math.round((v / max) * 100)}%"><span>${["П","В","С","Ч","П","С","В"][i]}</span></div>`).join("")}
+          </div>
+          <div class="divider"></div>
+          <div class="row-between"><span class="muted">Средний чек</span><strong>${money(4800)}</strong></div>
+          <div class="row-between" style="margin-top:6px"><span class="muted">Повторные записи</span><strong>68%</strong></div>
+          <div class="row-between" style="margin-top:6px"><span class="muted">Чаевые</span><strong>${money(1800)}</strong></div>
+        </div>
+        <div class="section">
+          <div class="card">
+            <strong>Контакты салона</strong>
+            <div class="tiny muted" style="margin-top:4px">Для клиентов и партнёров</div>
+            <a class="btn btn-blue btn-block" style="margin-top:12px" href="${SALON_PHONE_TEL}">☎ ${SALON_PHONE}</a>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-head"><h2>Платежи и чаевые</h2></div>
+          ${state.payments.map((p) => `
+            <div class="card row-between">
+              <div><strong>${p.title}</strong><div class="tiny muted">${formatDate(p.date)}</div></div>
+              <span class="price">${money(p.amount + p.tip)}</span>
+            </div>`).join("")}
+        </div>
+        <div class="section">
+          <div class="card row-between">
+            <div><strong>Автонапоминания</strong><div class="tiny muted">SMS/Push клиентам до визита</div></div>
+            <button class="chip ${state.reminders ? "ok" : "warn"}" data-action="toggle-reminders">${state.reminders ? "Вкл" : "Выкл"}</button>
+          </div>
+        </div>`;
+    }
+
+    function bindGroomerActions(root) {
+      root.querySelectorAll("[data-action]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const action = el.dataset.action;
+          if (action === "approve-req") {
+            const req = state.requests.find((r) => r.id === el.dataset.id);
+            if (!req) return;
+            state.appointments.unshift({
+              id: uid("ap"),
+              date: req.date,
+              time: req.time,
+              serviceIds: ["dog_full"],
+              serviceId: "dog_full",
+              groomerId: "olga",
+              petId: state.pets[0].id,
+              status: "confirmed",
+              price: 2500,
+              tip: 0,
+              paid: false
+            });
+            state.requests = state.requests.filter((r) => r.id !== req.id);
+            state.clients = state.clients.map((c) => c.name.startsWith("Игорь") ? { ...c, visits: c.visits + 1 } : c);
+            save();
+            renderGroomer();
+            toast("Заявка одобрена, клиенту уйдёт уведомление");
+          }
+          if (action === "decline-req") {
+            state.requests = state.requests.filter((r) => r.id !== el.dataset.id);
+            save(); renderGroomer(); toast("Заявка отклонена");
+          }
+          if (action === "pick-day") {
+            state.selectedDay = el.dataset.id; save(); renderGroomer();
+          }
+          if (action === "g-send") {
+            const input = document.getElementById("gChatInput");
+            const text = (input?.value || "").trim();
+            if (!text) return;
+            const time = new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+            state.chat.push({ id: Date.now(), from: "salon", text, time });
+            save(); renderGroomer();
+          }
+          if (action === "message-client") {
+            state.groomerTab = "chat"; save(); renderGroomer();
+            toast("Чат с " + el.dataset.name);
+          }
+          if (action === "toggle-reminders") {
+            state.reminders = !state.reminders; save(); renderGroomer();
+            toast(state.reminders ? "Автонапоминания включены" : "Автонапоминания выключены");
+          }
+        });
+      });
+      const input = document.getElementById("gChatInput");
+      if (input) input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          const btn = root.querySelector('[data-action="g-send"]');
+          btn?.click();
+        }
+      });
+    }
+
+    /* ---------- SHEETS ---------- */
+    function openSheet(html) {
+      const sheet = document.getElementById("sheet");
+      document.getElementById("sheetBody").innerHTML = `<div class="handle"></div>${html}`;
+      sheet.classList.add("open");
+      sheet.onclick = (e) => { if (e.target === sheet) closeSheet(); };
+    }
+    function closeSheet() {
+      document.getElementById("sheet").classList.remove("open");
+    }
+
+    function confirmCancelAppointment(apId) {
+      const ap = state.appointments.find((a) => a.id === apId);
+      if (!ap || ap.status !== "confirmed") return toast("Запись уже недоступна для отмены");
+      const pet = petById(ap.petId);
+      const label = servicesLabel(appointmentServiceIds(ap));
+      openSheet(`
+        <h2>Отменить запись?</h2>
+        <p class="tiny muted" style="margin:6px 0 14px">Вы уверены, что хотите отменить запись?</p>
+        <div class="card">
+          <strong>${pet?.name || "Питомец"} · ${label}</strong>
+          <div class="tiny muted" style="margin-top:4px">${formatDate(ap.date)} · ${ap.time} · ${groomerById(ap.groomerId)?.name || ""}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
+          <button class="btn btn-secondary" id="cancelNo">Оставить</button>
+          <button class="btn btn-primary" id="cancelYes" style="background:linear-gradient(135deg,#E25555,#FF7A3D)">Отменить</button>
+        </div>
+      `);
+      document.getElementById("cancelNo").onclick = () => closeSheet();
+      document.getElementById("cancelYes").onclick = () => {
+        ap.status = "cancelled";
+        ap.cancelledAt = todayISO();
+        save();
+        closeSheet();
+        if (state.role === "client") renderClient();
+        else renderGroomer();
+        toast("Запись отменена");
+      };
+    }
+
+    function confirmDeleteCard(cardId) {
+      const card = state.cards.find((c) => c.id === cardId);
+      if (!card) return;
+      openSheet(`
+        <h2>Удалить карту?</h2>
+        <p class="tiny muted" style="margin:6px 0 14px">${cardLabel(card)} будет отвязана от профиля.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
+          <button class="btn btn-secondary" id="delCardNo">Оставить</button>
+          <button class="btn btn-primary" id="delCardYes" style="background:linear-gradient(135deg,#E25555,#FF7A3D)">Удалить</button>
+        </div>
+      `);
+      document.getElementById("delCardNo").onclick = () => closeSheet();
+      document.getElementById("delCardYes").onclick = () => {
+        state.cards = state.cards.filter((c) => c.id !== cardId);
+        save(); closeSheet(); renderClient(); toast("Карта удалена");
+      };
+    }
+
+    function openAddCard() {
+      openSheet(`
+        <h2>Привязать карту</h2>
+        <p class="tiny muted" style="margin:6px 0 12px">Демо-режим: полный номер и CVV <strong>не сохраняются</strong>. Хранится только маска •••• last4 на этом устройстве. Реальная оплата на сервере не выполняется.</p>
+        <div class="pay-card-visual" id="cardPreview">
+          <div class="brand-line"><span id="prevBrand">CARD</span><span>Groomly Pay</span></div>
+          <div class="num" id="prevNum">•••• •••• •••• ••••</div>
+          <div class="meta-row">
+            <div><div class="tiny" style="opacity:.75">Владелец</div><div id="prevHolder">NAME SURNAME</div></div>
+            <div style="text-align:right"><div class="tiny" style="opacity:.75">Срок</div><div id="prevExp">MM/YY</div></div>
+          </div>
+        </div>
+        <div class="field"><label>Номер карты</label><input id="cardNum" inputmode="numeric" autocomplete="cc-number" placeholder="4242 4242 4242 4242" maxlength="23" /></div>
+        <div id="errNum" class="field-error">Введите корректный номер карты</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="field"><label>Срок действия (MM/YY)</label><input id="cardExp" inputmode="numeric" autocomplete="cc-exp" placeholder="09/28" maxlength="5" /></div>
+          <div class="field"><label>CVV</label><input id="cardCvv" inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="4" type="password" /></div>
+        </div>
+        <div id="errExp" class="field-error">Укажите срок в формате MM/YY</div>
+        <div id="errCvv" class="field-error">Введите CVV (3–4 цифры)</div>
+        <div class="field"><label>Имя владельца</label><input id="cardHolder" autocomplete="cc-name" placeholder="MARIA SOKOLOVA" /></div>
+        <div id="errHolder" class="field-error">Введите имя владельца</div>
+        <button class="btn btn-primary btn-block" id="saveCard">Привязать карту</button>
+        <button class="btn btn-ghost btn-block" id="closeCard" style="margin-top:6px">Отмена</button>
+      `);
+
+      const numEl = document.getElementById("cardNum");
+      const expEl = document.getElementById("cardExp");
+      const cvvEl = document.getElementById("cardCvv");
+      const holderEl = document.getElementById("cardHolder");
+      const syncPreview = () => {
+        const digits = numEl.value.replace(/\D/g, "");
+        document.getElementById("prevBrand").textContent = detectCardBrand(digits).toUpperCase();
+        if (!digits.length) {
+          document.getElementById("prevNum").textContent = "•••• •••• •••• ••••";
+        } else {
+          const masked = ("•".repeat(Math.max(0, Math.max(16, digits.length) - 4)) + digits.slice(-4)).slice(-Math.max(16, digits.length));
+          document.getElementById("prevNum").textContent = formatCardNumber(masked);
+        }
+        document.getElementById("prevExp").textContent = expEl.value || "MM/YY";
+        document.getElementById("prevHolder").textContent = (holderEl.value || "NAME SURNAME").toUpperCase();
+      };
+
+      numEl.addEventListener("input", () => {
+        numEl.value = formatCardNumber(numEl.value);
+        syncPreview();
+      });
+      expEl.addEventListener("input", () => {
+        expEl.value = formatExp(expEl.value);
+        syncPreview();
+      });
+      holderEl.addEventListener("input", syncPreview);
+      document.getElementById("closeCard").onclick = () => closeSheet();
+
+      document.getElementById("saveCard").onclick = () => {
+        const digits = numEl.value.replace(/\D/g, "");
+        const exp = expEl.value.trim();
+        const cvv = cvvEl.value.replace(/\D/g, "");
+        const holder = holderEl.value.trim();
+        let ok = true;
+        const showErr = (id, on) => document.getElementById(id).classList.toggle("show", on);
+        if (digits.length < 13 || digits.length > 19) { showErr("errNum", true); ok = false; } else showErr("errNum", false);
+        if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(exp)) { showErr("errExp", true); ok = false; } else showErr("errExp", false);
+        if (cvv.length < 3 || cvv.length > 4) { showErr("errCvv", true); ok = false; } else showErr("errCvv", false);
+        if (holder.length < 2) { showErr("errHolder", true); ok = false; } else showErr("errHolder", false);
+        if (!ok) return toast("Проверьте данные карты");
+
+        const brand = detectCardBrand(digits);
+        const card = {
+          id: uid("card"),
+          brand,
+          last4: digits.slice(-4),
+          exp,
+          holder: holder.toUpperCase()
+        };
+        // CVV и полный PAN сразу очищаем из DOM — в storage не пишем
+        cvvEl.value = "";
+        numEl.value = "";
+        state.cards = [card, ...state.cards.filter((c) => !(c.last4 === card.last4 && c.brand === card.brand))];
+        save();
+        closeSheet();
+        renderClient();
+        toast(`${cardLabel(card)} привязана (демо)`);
+      };
+      syncPreview();
+    }
+
+    function openReview(apId) {
+      const ap = state.appointments.find((a) => a.id === apId);
+      const pet = petById(ap.petId);
+      openSheet(`
+        <h2>Отзыв после визита</h2>
+        <p class="tiny muted" style="margin:6px 0 14px">${pet.name} · ${servicesLabel(appointmentServiceIds(ap))}</p>
+        <div class="chips" id="starPick">
+          ${[5,4,3,2,1].map((n) => `<button class="chip ${n === 5 ? "ok" : ""}" data-stars="${n}">${"★".repeat(n)}</button>`).join("")}
+        </div>
+        <div class="field" style="margin-top:12px"><label>Комментарий</label><textarea id="reviewText" placeholder="Как всё прошло?"></textarea></div>
+        <button class="btn btn-primary btn-block" id="saveReview">Отправить</button>
+      `);
+      let stars = 5;
+      document.querySelectorAll("#starPick .chip").forEach((c) => {
+        c.onclick = () => {
+          stars = Number(c.dataset.stars);
+          document.querySelectorAll("#starPick .chip").forEach((x) => x.classList.toggle("ok", x === c));
+        };
+      });
+      document.getElementById("saveReview").onclick = () => {
+        const text = document.getElementById("reviewText").value.trim() || "Отличный визит!";
+        state.reviews.unshift({ id: uid("rv"), pet: pet.name, stars, text, date: todayISO() });
+        save(); closeSheet(); renderClient(); toast("Спасибо за отзыв!");
+      };
+    }
+
+    /* ---------- BOOT ---------- */
+    applyTheme();
+    if (state.role) enterApp();
+    else showView("view-welcome");
+  })();
+  </script>
+</body>
+</html>

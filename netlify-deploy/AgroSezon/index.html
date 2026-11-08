@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AgroSezon — сезонный календарь</title>
+  <meta name="description" content="AgroSezon показывает, какие овощи, зелень, фрукты и ягоды собирают в выбранной стране и климатической зоне в конкретный месяц.">
+  <meta name="theme-color" content="#1B5E20">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline'; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="AgroSezon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,620;7..72,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Природный минимализм: зелень + терракота, светлая и тёмная темы. */
+    :root {
+      --bg-outer: #dce6d6;
+      --bg: #f5f3ee;
+      --card: #ffffff;
+      --text: #1c2a22;
+      --muted: #5d6e64;
+      --line: #e3e6dc;
+      --green: #1b5e20;
+      --green-deep: #1b5e20;
+      --green-soft: #e6f3e6;
+      --terra: #c45c3e;
+      --terra-soft: #f8e8e1;
+      --berry: #8d3d55;
+      --shadow: 0 12px 32px rgba(36, 58, 40, 0.08);
+      --radius: 16px;
+      --font: "Manrope", "Segoe UI", sans-serif;
+      --display: "Literata", Georgia, serif;
+      color-scheme: light;
+    }
+
+    [data-theme="dark"] {
+      --bg-outer: #070c09;
+      --bg: #101712;
+      --card: #1a2420;
+      --text: #e8f3ec;
+      --muted: #a9bdb1;
+      --line: #2c3b33;
+      --green: #8dcea0;
+      --green-deep: #2e7d32;
+      --green-soft: #1b3324;
+      --terra: #f0a58a;
+      --terra-soft: #3a2722;
+      --berry: #f0b3c3;
+      --shadow: 0 14px 34px rgba(0, 0, 0, 0.32);
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(900px 420px at 10% -10%, rgba(46, 125, 50, 0.16), transparent 60%),
+        var(--bg-outer);
+    }
+
+    button, input, select { font: inherit; color: inherit; }
+
+    button { cursor: pointer; }
+
+    .app {
+      width: min(480px, 100%);
+      min-height: 100vh;
+      min-height: 100dvh;
+      margin: 0 auto;
+      padding: 22px 18px 36px;
+      background: var(--bg);
+    }
+
+    /* На смартфоне — на всю ширину, без узкой колонки по центру */
+    @media (max-width: 1100px), (hover: none) and (pointer: coarse) {
+      body { background: var(--bg); }
+      .app {
+        width: 100% !important;
+        max-width: none !important;
+        min-height: 100dvh;
+        min-height: 100vh;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        padding: 18px 16px 32px;
+      }
+    }
+    html.mobile-fill body { background: var(--bg); }
+    html.mobile-fill .app {
+      width: 100% !important;
+      max-width: none !important;
+      min-height: 100dvh;
+      min-height: 100vh;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+
+    @media (min-width: 760px) {
+      body { padding: 28px 16px; }
+      .app {
+        min-height: calc(100vh - 56px);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+      }
+    }
+
+    /* Режим встраивания в портфолио (iframe) — надёжная высота на мобильных */
+    html.embed, html.embed body {
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      overflow: auto;
+      padding: 0 !important;
+      background: var(--bg);
+      position: relative;
+    }
+    html.embed .app {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 16px 14px 28px;
+    }
+
+    .back-to-site {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0 0 14px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      width: fit-content;
+    }
+    html.embed .back-to-site { display: none !important; }
+
+    .top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: var(--green-deep);
+      color: #fff;
+      flex: none;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: var(--display);
+      font-size: 28px;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .tagline {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .theme-btn {
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 999px;
+      min-height: 44px;
+      padding: 0 14px;
+      font-weight: 700;
+      font-size: 13px;
+      transition: transform 180ms ease, background 180ms ease;
+    }
+
+    .theme-btn:active { transform: scale(0.97); }
+
+    .tools {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .lang {
+      display: flex;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      overflow: hidden;
+      background: var(--card);
+    }
+
+    .lang button {
+      border: 0;
+      background: transparent;
+      min-width: 42px;
+      min-height: 36px;
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .lang button.is-on {
+      background: var(--green-deep);
+      color: #fff;
+    }
+
+    .legal {
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .view { display: none; }
+    .view.is-active { display: block; animation: rise 220ms ease; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-family: var(--display);
+      font-size: 22px;
+      letter-spacing: -0.03em;
+    }
+
+    .field { margin: 16px 0; }
+
+    .field span, .block-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    select, .search {
+      width: 100%;
+      min-height: 52px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      padding: 0 14px;
+      outline: none;
+      transition: border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    select:focus, .search:focus {
+      border-color: var(--green-deep);
+      box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.15);
+    }
+
+    .region-list, .months, .cats {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .months, .cats {
+      flex-direction: row;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+
+    .months::-webkit-scrollbar, .cats::-webkit-scrollbar { display: none; }
+
+    .region-card, .chip, .cat, .icon-btn, .primary, .product {
+      transition: transform 180ms cubic-bezier(0.4, 0, 0.2, 1), background 180ms ease, border-color 180ms ease, color 180ms ease;
+    }
+
+    .region-card, .chip, .cat, .icon-btn, .primary:active { }
+
+    .region-card:active, .chip:active, .cat:active, .icon-btn:active, .primary:active {
+      transform: scale(0.98);
+    }
+
+    .region-card {
+      text-align: left;
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .region-card small {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .region-card strong { font-size: 17px; }
+
+    .region-card.is-on, .chip.is-on, .cat.is-on {
+      background: var(--green-deep);
+      color: #fff;
+      border-color: var(--green-deep);
+    }
+
+    .region-card.is-on small { color: rgba(255, 255, 255, 0.8); }
+
+    .chip, .cat {
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 14px;
+      min-height: 48px;
+      padding: 0 14px;
+      flex: none;
+      font-weight: 700;
+    }
+
+    .chip { position: relative; }
+
+    .now {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      opacity: 0.75;
+    }
+
+    .dock { margin-top: 22px; }
+
+    .primary {
+      width: 100%;
+      min-height: 54px;
+      border: 0;
+      border-radius: 16px;
+      background: var(--green-deep);
+      color: #fff;
+      font-weight: 700;
+      font-size: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .note {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .back {
+      border: 0;
+      background: transparent;
+      color: var(--green);
+      font-weight: 700;
+      padding: 0;
+      min-height: 44px;
+    }
+
+    .switch {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 6px 0 8px;
+    }
+
+    .switch h2 { font-size: 32px; margin: 0; }
+
+    .icon-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      font-size: 22px;
+    }
+
+    .place {
+      margin: 0 0 14px;
+      color: var(--muted);
+    }
+
+    .group { margin-top: 18px; }
+
+    .group h3 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .product {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+
+    .emoji {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 26px;
+      background: var(--green-soft);
+      flex: none;
+    }
+
+    .group[data-cat="fruit"] .emoji { background: var(--terra-soft); }
+    .group[data-cat="berry"] .emoji { background: #f8e8ee; }
+    [data-theme="dark"] .group[data-cat="berry"] .emoji { background: #3a2430; }
+
+    .product h4 { margin: 0 0 4px; font-size: 16px; }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status.peak { background: var(--green-soft); color: var(--green); }
+    .status.start { background: var(--terra-soft); color: var(--terra); }
+    .status.end { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+
+    .empty {
+      margin-top: 24px;
+      padding: 22px 18px;
+      border-radius: var(--radius);
+      background: var(--card);
+      border: 1px dashed var(--line);
+    }
+
+    .empty strong { display: block; font-family: var(--display); font-size: 22px; margin-bottom: 6px; }
+
+    .count { margin: 0 0 8px; font-weight: 700; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+  <script>
+    (function () {
+      var root = document.documentElement;
+      if (window.self !== window.top || /(?:\?|&)embed=1(?:&|$)/.test(location.search)) {
+        root.classList.add("embed");
+      }
+      function markMobile() {
+        var touch = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+        var narrow = Math.min(window.innerWidth, window.innerHeight) < 1100;
+        root.classList.toggle("mobile-fill", touch || narrow);
+      }
+      markMobile();
+      window.addEventListener("resize", markMobile);
+      window.addEventListener("orientationchange", markMobile);
+
+      document.addEventListener("DOMContentLoaded", function () {
+        var back = document.getElementById("backToSite");
+        if (!back || root.classList.contains("embed")) return;
+        back.addEventListener("click", function (event) {
+          if (window.history.length > 1) {
+            event.preventDefault();
+            window.history.back();
+          }
+        });
+      });
+    })();
+  </script>
+</head>
+<body>
+  <div class="app">
+    <a class="back-to-site" id="backToSite" href="../index.html">← Назад к визитке</a>
+    <header class="top">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M12 21V10" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M12 13c0-5 3.5-8 8-8-1 5-4 8-8 8Z" fill="white"/>
+            <path d="M12 15c0-4-3-6.5-7.5-7 1.2 4.2 3.8 6.5 7.5 7Z" fill="white" opacity=".85"/>
+          </svg>
+        </div>
+        <div>
+          <h1>AgroSezon</h1>
+          <p class="tagline" id="tagline">Что созревает в этом месяце</p>
+        </div>
+      </div>
+      <div class="tools">
+        <div class="lang" id="langSwitch" role="group" aria-label="Language">
+          <button type="button" data-set-lang="ru" id="langRu" aria-pressed="true">RU</button>
+          <button type="button" data-set-lang="en" id="langEn" aria-pressed="false">EN</button>
+        </div>
+        <button class="theme-btn" id="themeToggle" type="button">Тёмная</button>
+      </div>
+    </header>
+
+    <main id="home" class="view is-active">
+      <p class="block-label" id="labelRegion">Регион</p>
+      <div class="region-list" id="regionList"></div>
+
+      <label class="field">
+        <span id="labelCountry">Страна</span>
+        <select id="countrySelect"></select>
+      </label>
+
+      <label class="field" id="zoneField" hidden>
+        <span id="labelZone">Климатическая зона</span>
+        <select id="zoneSelect"></select>
+      </label>
+
+      <p class="block-label" id="labelMonth">Месяц</p>
+      <div class="months" id="monthList"></div>
+
+      <div class="dock">
+        <button class="primary" id="showSeason" type="button">Показать сезон</button>
+        <p class="note" id="seasonNote">Сроки — типовой сбор в открытом грунте, без теплиц. Погода конкретного года может сдвинуть окно на пару недель.</p>
+      </div>
+    </main>
+
+    <main id="results" class="view">
+      <button class="back" id="backBtn" type="button">← К выбору</button>
+      <div class="switch">
+        <button class="icon-btn" id="prevMonth" type="button" aria-label="Предыдущий месяц">‹</button>
+        <h2 id="resultsTitle" tabindex="-1">Ноябрь</h2>
+        <button class="icon-btn" id="nextMonth" type="button" aria-label="Следующий месяц">›</button>
+      </div>
+      <p class="place" id="placeLabel"></p>
+      <input class="search" id="search" type="search" placeholder="Поиск по названию" autocomplete="off" spellcheck="false">
+      <div class="cats" id="catList" style="margin-top:12px"></div>
+      <p class="count" id="resultCount" aria-live="polite"></p>
+      <div id="resultBody"></div>
+    </main>
+
+    <p class="legal" id="copyright">© 2026 Дмитрий Эполетов. Все права защищены.</p>
+  </div>
+
+  <script>
+    /*
+      Архитектура AgroSezon
+      -----------------------
+      1. Справочник мест: регион → страна → зона (если зон несколько).
+         У каждой конечной точки есть климатический ключ, не показываемый пользователю.
+      2. Справочник культур: категория, эмодзи, название и сезоны по климатам.
+         Строка сезона: "cool:6-9;med:5-10;nile:11-4=12-3".
+         6-9 — окно сбора, пик считается по середине.
+         11-4=12-3 — окно ноябрь–апрель, явный пик декабрь–март.
+         Знак "-" запрещает культуре наследовать похожий климат.
+      3. Похожие климаты связаны через FALLBACK, чтобы не копировать одинаковые окна.
+      4. Экран выбора пишет состояние, экран результатов только читает его и рисует список.
+      5. Тема, язык и последний выбор лежат в localStorage.
+      6. Язык не меняет сезоны. COPY хранит фразы интерфейса, EN — английские
+         названия мест и культур рядом с русскими строками в REGIONS и CROP_ROWS.
+    */
+
+    const CATEGORY_IDS = ["all", "veg", "greens", "fruit", "berry"];
+
+    const COPY = {
+      ru: {
+        tagline: "Что созревает в этом месяце",
+        themeToDark: "Тёмная",
+        themeToLight: "Светлая",
+        region: "Регион",
+        country: "Страна",
+        zone: "Климатическая зона",
+        month: "Месяц",
+        show: "Показать сезон",
+        note: "Сроки — типовой сбор в открытом грунте, без теплиц. Погода конкретного года может сдвинуть окно на пару недель.",
+        back: "← К выбору",
+        prev: "Предыдущий месяц",
+        next: "Следующий месяц",
+        search: "Поиск по названию",
+        inSeason: "В сезоне",
+        emptyTitle: "Сейчас тишина",
+        emptyText: "В открытом грунте нет активного сбора по этому запросу. Сдвиньте месяц стрелками или сбросьте поиск.",
+        now: "сейчас",
+        places: "стран",
+        copyright: "© 2026 Дмитрий Эполетов. Все права защищены.",
+        docTitle: "AgroSezon — сезонный календарь",
+        meta: "AgroSezon показывает, какие овощи, зелень, фрукты и ягоды собирают в выбранной стране и климатической зоне в конкретный месяц.",
+        months: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+        categories: { all: "Все", veg: "Овощи", greens: "Зелень", fruit: "Фрукты", berry: "Ягоды" },
+        status: { start: "Начало сезона", peak: "Пик сезона", end: "Конец сезона" }
+      },
+      en: {
+        tagline: "What is in season this month",
+        themeToDark: "Dark",
+        themeToLight: "Light",
+        region: "Region",
+        country: "Country",
+        zone: "Climate zone",
+        month: "Month",
+        show: "Show season",
+        note: "Dates are typical outdoor harvests, not greenhouses. A particular year can shift the window by a couple of weeks.",
+        back: "← Back",
+        prev: "Previous month",
+        next: "Next month",
+        search: "Search by name",
+        inSeason: "In season",
+        emptyTitle: "Quiet for now",
+        emptyText: "Nothing is being harvested outdoors for this search. Move the month or clear the search.",
+        now: "now",
+        places: "countries",
+        copyright: "© 2026 Dmitry Epoletov. All rights reserved.",
+        docTitle: "AgroSezon — seasonal calendar",
+        meta: "AgroSezon shows which vegetables, herbs, fruit and berries are harvested in a chosen country and climate zone during a given month.",
+        months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+        categories: { all: "All", veg: "Vegetables", greens: "Herbs", fruit: "Fruit", berry: "Berries" },
+        status: { start: "Early season", peak: "Peak season", end: "Late season" }
+      }
+    };
+
+    /* Если у климата нет своего окна, берём ближайший похожий. */
+    const FALLBACK = {
+      fareast: "cont",
+      tempAsia: "cont",
+      medMild: "cool",
+      drymed: "med",
+      subtrop: "sub",
+      sahel: "arid"
+    };
+
+    const REGIONS = [
+      {
+        id: "europe",
+        name: "Европа",
+        countries: [
+          { id: "ru", name: "Россия", zones: [
+            { id: "eu", name: "Европейская часть", climate: "cont" },
+            { id: "south", name: "Юг", climate: "south" },
+            { id: "sib", name: "Сибирь", climate: "cold" },
+            { id: "fe", name: "Дальний Восток", climate: "fareast" }
+          ]},
+          { id: "de", name: "Германия", climate: "cool" },
+          { id: "fr", name: "Франция", zones: [
+            { id: "north", name: "Север/Центр", climate: "cool" },
+            { id: "south", name: "Юг", climate: "med" }
+          ]},
+          { id: "it", name: "Италия", zones: [
+            { id: "north", name: "Север", climate: "medMild" },
+            { id: "center", name: "Центр", climate: "med" },
+            { id: "south", name: "Юг", climate: "med" }
+          ]},
+          { id: "es", name: "Испания", zones: [
+            { id: "north", name: "Север", climate: "medMild" },
+            { id: "center", name: "Центр", climate: "drymed" },
+            { id: "south", name: "Юг", climate: "med" }
+          ]},
+          { id: "pl", name: "Польша", climate: "cool" },
+          { id: "ua", name: "Украина", zones: [
+            { id: "north", name: "Север/Центр", climate: "cont" },
+            { id: "south", name: "Юг", climate: "south" }
+          ]},
+          { id: "uk", name: "Великобритания", climate: "cool" },
+          { id: "ro", name: "Румыния", climate: "cont" },
+          { id: "nl", name: "Нидерланды", climate: "cool" },
+          { id: "gr", name: "Греция", climate: "med" },
+          { id: "by", name: "Беларусь", climate: "cont" },
+          { id: "md", name: "Молдова", climate: "south" },
+          { id: "cz", name: "Чехия", climate: "cool" },
+          { id: "tr", name: "Турция", zones: [
+            { id: "west", name: "Запад", climate: "med" },
+            { id: "anatolia", name: "Центральная Анатолия", climate: "drymed" },
+            { id: "east", name: "Восток", climate: "cont" },
+            { id: "black", name: "Черноморское побережье", climate: "sub" }
+          ]}
+        ]
+      },
+      {
+        id: "africa",
+        name: "Северная Африка",
+        countries: [
+          { id: "ma", name: "Марокко", zones: [
+            { id: "coast", name: "Побережье", climate: "med" },
+            { id: "in", name: "Внутренние районы", climate: "drymed" },
+            { id: "south", name: "Юг", climate: "arid" }
+          ]},
+          { id: "dz", name: "Алжир", zones: [
+            { id: "coast", name: "Побережье", climate: "med" },
+            { id: "in", name: "Внутренние районы", climate: "drymed" },
+            { id: "sahara", name: "Юг/Сахара", climate: "arid" }
+          ]},
+          { id: "tn", name: "Тунис", zones: [
+            { id: "coast", name: "Побережье", climate: "med" },
+            { id: "in", name: "Внутренние районы", climate: "drymed" }
+          ]},
+          { id: "ly", name: "Ливия", climate: "arid" },
+          { id: "eg", name: "Египет", zones: [
+            { id: "nile", name: "Долина Нила", climate: "nile" },
+            { id: "rest", name: "Остальная территория", climate: "arid" }
+          ]},
+          { id: "sd", name: "Судан", climate: "sahel" },
+          { id: "mr", name: "Мавритания", climate: "arid" }
+        ]
+      },
+      {
+        id: "asia",
+        name: "Азия",
+        countries: [
+          { id: "cn", name: "Китай", zones: [
+            { id: "north", name: "Север", climate: "cont" },
+            { id: "center", name: "Центр", climate: "sub" },
+            { id: "south", name: "Юг", climate: "subtrop" },
+            { id: "nw", name: "Северо-Запад", climate: "arid" },
+            { id: "sw", name: "Юго-Запад", climate: "sub" }
+          ]},
+          { id: "in", name: "Индия", zones: [
+            { id: "north", name: "Север", climate: "mon" },
+            { id: "center", name: "Центр", climate: "mon" },
+            { id: "south", name: "Юг", climate: "trop" },
+            { id: "west", name: "Запад", climate: "mon" }
+          ]},
+          { id: "jp", name: "Япония", climate: "tempAsia" },
+          { id: "kr", name: "Южная Корея", climate: "tempAsia" },
+          { id: "id", name: "Индонезия", climate: "trop" },
+          { id: "vn", name: "Вьетнам", zones: [
+            { id: "north", name: "Север", climate: "mon" },
+            { id: "center", name: "Центр", climate: "trop" },
+            { id: "south", name: "Юг", climate: "trop" }
+          ]},
+          { id: "th", name: "Таиланд", climate: "trop" },
+          { id: "ph", name: "Филиппины", climate: "trop" },
+          { id: "my", name: "Малайзия", climate: "trop" },
+          { id: "pk", name: "Пакистан", climate: "mon" },
+          { id: "bd", name: "Бангладеш", climate: "mon" },
+          { id: "ir", name: "Иран", climate: "drymed" },
+          { id: "la", name: "Лаос", climate: "trop" },
+          { id: "kh", name: "Камбоджа", climate: "trop" },
+          { id: "mm", name: "Мьянма", climate: "mon" }
+        ]
+      }
+    ];
+
+    /* Английские названия рядом с русскими строками в REGIONS. Ключ зоны: страна.зона */
+    const EN = {
+      regions: { europe: "Europe", africa: "North Africa", asia: "Asia" },
+      countries: {
+        ru: "Russia", de: "Germany", fr: "France", it: "Italy", es: "Spain", pl: "Poland", ua: "Ukraine",
+        uk: "United Kingdom", ro: "Romania", nl: "Netherlands", gr: "Greece", by: "Belarus", md: "Moldova",
+        cz: "Czechia", tr: "Turkey", ma: "Morocco", dz: "Algeria", tn: "Tunisia", ly: "Libya", eg: "Egypt",
+        sd: "Sudan", mr: "Mauritania", cn: "China", in: "India", jp: "Japan", kr: "South Korea",
+        id: "Indonesia", vn: "Vietnam", th: "Thailand", ph: "Philippines", my: "Malaysia", pk: "Pakistan",
+        bd: "Bangladesh", ir: "Iran", la: "Laos", kh: "Cambodia", mm: "Myanmar"
+      },
+      zones: {
+        "ru.eu": "European part", "ru.south": "South", "ru.sib": "Siberia", "ru.fe": "Far East",
+        "fr.north": "North/Center", "fr.south": "South",
+        "it.north": "North", "it.center": "Center", "it.south": "South",
+        "es.north": "North", "es.center": "Center", "es.south": "South",
+        "ua.north": "North/Center", "ua.south": "South",
+        "tr.west": "West", "tr.anatolia": "Central Anatolia", "tr.east": "East", "tr.black": "Black Sea coast",
+        "ma.coast": "Coast", "ma.in": "Interior", "ma.south": "South",
+        "dz.coast": "Coast", "dz.in": "Interior", "dz.sahara": "South/Sahara",
+        "tn.coast": "Coast", "tn.in": "Interior",
+        "eg.nile": "Nile Valley", "eg.rest": "Rest of the country",
+        "cn.north": "North", "cn.center": "Center", "cn.south": "South", "cn.nw": "Northwest", "cn.sw": "Southwest",
+        "in.north": "North", "in.center": "Center", "in.south": "South", "in.west": "West",
+        "vn.north": "North", "vn.center": "Center", "vn.south": "South"
+      },
+      crops: {
+        tomato: "Tomato", cucumber: "Cucumber", carrot: "Carrot", onion: "Onion", garlic: "Garlic",
+        potato: "Potato", eggplant: "Eggplant", pepper: "Bell pepper", broccoli: "Broccoli", cabbage: "Cabbage",
+        corn: "Corn", pumpkin: "Pumpkin", lettuce: "Lettuce", chili: "Chili pepper", pea: "Pea", bean: "Bean",
+        sweetpotato: "Sweet potato", ginger: "Ginger", parsley: "Parsley", dill: "Dill", basil: "Basil",
+        cilantro: "Cilantro", spinach: "Spinach", greenonion: "Green onion", scapes: "Garlic scapes",
+        rosemary: "Rosemary", thyme: "Thyme", mint: "Mint", tarragon: "Tarragon", arugula: "Arugula",
+        apple: "Apple", pear: "Pear", peach: "Peach", orange: "Orange", lemon: "Lemon", banana: "Banana",
+        watermelon: "Watermelon", melon: "Melon", grape: "Grapes", cherry: "Sour cherry", pineapple: "Pineapple",
+        mango: "Mango", kiwi: "Kiwi", coconut: "Coconut", olive: "Olives", mandarin: "Mandarin", lime: "Lime",
+        strawberry: "Strawberry", bilberry: "Bilberry", currant: "Currant", sweetcherry: "Sweet cherry",
+        blueberry: "Blueberry", raspberry: "Raspberry", blackberry: "Blackberry", gooseberry: "Gooseberry",
+        sourcherry: "Sour cherry", lingonberry: "Lingonberry", wildstrawberry: "Wild strawberry"
+      }
+    };
+
+    /* Сезоны — месяцы сбора, не полки магазина. Пик в середине окна, если не задан через "=". */
+    const CROP_ROWS = [
+      ["tomato", "veg", "🍅", "Томат", "cool:6-9;cont:7-9;cold:7-8;south:6-9;med:5-10;medMild:6-9;drymed:6-9;sub:4-6,9-11;nile:11-4=12-3;arid:11-3=12-2;trop:5-9;mon:10-3=12-2"],
+      ["cucumber", "veg", "🥒", "Огурец", "cool:6-9;cont:6-8;cold:7-8;south:5-9;med:5-9;sub:4-6,9-11;nile:11-4=1-3;arid:11-3=1-2;trop:4-9;mon:6-10=7-9"],
+      ["carrot", "veg", "🥕", "Морковь", "cool:6-10;cont:7-11;cold:8-9;south:6-11;med:10-5=11-3;medMild:9-4=10-2;sub:10-4=12-2;nile:11-3=12-2;arid:11-2=12-1;trop:6-9;mon:10-3=12-2"],
+      ["onion", "veg", "🧅", "Лук", "cool:7-9;cont:8-9;cold:8-9;south:7-8;med:5-8=6-7;sub:3-6=4-5;nile:3-6=4-5;arid:2-5=3-4;trop:5-8;mon:3-6=4-5"],
+      ["garlic", "veg", "🧄", "Чеснок", "cool:7-8;cont:7-8;cold:8-8;south:6-7;med:5-7=6-6;sub:4-6;nile:3-5;arid:3-5;trop:-;mon:3-5"],
+      ["potato", "veg", "🥔", "Картофель", "cool:7-10;cont:8-9;cold:8-9;south:7-9;med:5-7;drymed:6-8;sub:4-6,10-12;nile:12-4=1-3;arid:12-3=1-2;trop:6-9;mon:10-3=12-2"],
+      ["eggplant", "veg", "🍆", "Баклажан", "cool:7-9;cont:7-9;cold:-;south:6-9;med:6-10;sub:5-10;nile:10-1=11-12;arid:10-1;trop:4-9;mon:6-10=8-9"],
+      ["pepper", "veg", "🫑", "Перец", "cool:7-9;cont:7-9;cold:-;south:6-9;med:6-10;sub:4-7,9-11;nile:11-4=1-3;arid:11-3;trop:5-10;mon:10-3=12-2"],
+      ["broccoli", "veg", "🥦", "Брокколи", "cool:6-11;cont:8-11;cold:8-8;south:10-11;med:11-3=1-2;sub:11-3=1-2;nile:12-3=1-2;arid:12-2;trop:-;mon:11-2=12-1"],
+      ["cabbage", "veg", "🥬", "Капуста", "cool:6-2=8-11;cont:7-11;cold:8-9;south:6-11;med:11-4=1-3;sub:11-3;nile:11-3=12-2;arid:12-2;trop:6-9;mon:11-2=12-1"],
+      ["corn", "veg", "🌽", "Кукуруза", "cool:8-9;cont:8-9;cold:8-8;south:7-9;med:7-9;sub:6-8;nile:6-8;arid:-;sahel:8-10;trop:5-8;mon:7-10=8-9"],
+      ["pumpkin", "veg", "🎃", "Тыква", "cool:9-10;cont:9-11;cold:9-9;south:8-10;med:8-10;sub:7-10;nile:6-8;arid:6-8;trop:5-8;mon:9-12=10-11"],
+      ["lettuce", "veg", "🥗", "Салат", "cool:5-9;cont:5-6,8-9;cold:7-8;south:4-6,9-10;med:11-4=1-3;sub:11-3=1-2;nile:11-3;arid:11-2;trop:-;mon:11-2"],
+      ["chili", "veg", "🌶️", "Острый перец", "cool:7-9;cont:8-9;cold:-;south:7-9;med:6-10;sub:5-10;nile:10-1;arid:10-1;trop:1-12=5-9;mon:6-11=8-10"],
+      ["pea", "veg", "🫛", "Горох", "cool:6-7;cont:6-7;cold:7-7;south:5-6;med:3-5;sub:1-3;nile:12-3=1-2;arid:12-2;trop:-;mon:11-2=12-1"],
+      ["bean", "veg", "🫘", "Фасоль", "cool:7-9;cont:7-8;cold:8-8;south:6-8;med:6-8;sub:5-7;nile:10-1=11-12;arid:11-1;trop:5-8;mon:6-9=7-8"],
+      ["sweetpotato", "veg", "🍠", "Батат", "cool:-;cont:-;cold:-;south:9-10;med:9-11;sub:8-11;nile:7-9;arid:-;sahel:8-10;trop:1-12=6-9;mon:8-11;tempAsia:9-10;fareast:9-10"],
+      ["ginger", "veg", "🫚", "Имбирь", "cool:-;cont:-;cold:-;med:-;south:-;sub:10-12;nile:-;arid:-;trop:10-1=11-12;mon:10-1=11-12"],
+
+      ["parsley", "greens", "🌿", "Петрушка", "cool:5-10;cont:6-9;cold:7-8;south:4-6,9-10;med:10-5=11-3;sub:10-4;nile:11-4;arid:11-3;trop:6-9;mon:11-3"],
+      ["dill", "greens", "🌱", "Укроп", "cool:5-9;cont:6-8;cold:7-8;south:5-7;med:3-6;sub:2-4,10-11;nile:11-3;arid:12-3;trop:-;mon:11-2"],
+      ["basil", "greens", "🍃", "Базилик", "cool:6-9;cont:7-8;cold:-;south:6-9;med:5-9;sub:4-10;nile:3-6;arid:2-4;trop:1-12=5-9;mon:6-10"],
+      ["cilantro", "greens", "🌿", "Кинза", "cool:5-9;cont:6-8;cold:7-8;south:4-6,9-10;med:11-4=1-3;sub:11-3;nile:11-3;arid:12-3;trop:6-8;mon:11-2"],
+      ["spinach", "greens", "🥬", "Шпинат", "cool:4-6,9-10;cont:5-6,9-9;cold:7-8;south:4-5,10-11;med:11-3=1-2;sub:11-2;nile:11-2;arid:12-2;trop:-;mon:11-2"],
+      ["greenonion", "greens", "🧅", "Зелёный лук", "cool:5-9;cont:6-9;cold:7-8;south:4-6,9-10;med:10-5=1-3;sub:10-4;nile:11-4;arid:11-3;trop:1-12=6-9;mon:11-3"],
+      ["scapes", "greens", "🧄", "Чесночные стрелки", "cool:6-6;cont:6-6;cold:7-7;south:5-5;med:4-5;sub:3-4;nile:2-3;arid:2-3;trop:-;mon:2-3"],
+      ["rosemary", "greens", "🌿", "Розмарин", "cool:5-9;cont:6-8;cold:-;fareast:-;south:4-10;med:1-12=4-6;sub:3-6;nile:11-4;arid:1-4;trop:-;mon:-"],
+      ["thyme", "greens", "🌿", "Тимьян", "cool:5-9;cont:6-8;cold:-;south:5-9;med:3-7;sub:3-6;nile:1-4;arid:1-4;trop:-;mon:-"],
+      ["mint", "greens", "🌿", "Мята", "cool:5-9;cont:6-8;cold:7-8;south:5-9;med:4-7;sub:3-6,9-11;nile:2-5;arid:1-3;trop:1-12=6-9;mon:6-10"],
+      ["tarragon", "greens", "🌿", "Эстрагон", "cool:5-8;cont:6-8;cold:-;south:5-7;med:4-6;sub:3-5;nile:-;arid:-;trop:-;mon:-"],
+      ["arugula", "greens", "🥬", "Руккола", "cool:4-6,9-10;cont:5-6,8-9;cold:7-7;south:4-5,10-11;med:11-4=1-3;sub:11-3;nile:11-3;arid:12-2;trop:-;mon:11-2"],
+
+      ["apple", "fruit", "🍎", "Яблоко", "cool:8-10=9-10;cont:8-11=9-10;cold:8-9;south:8-9;med:8-10;medMild:9-10;sub:8-9;nile:-;arid:-;trop:-;mon:8-9"],
+      ["pear", "fruit", "🍐", "Груша", "cool:8-10;cont:8-10;cold:9-9;south:8-9;med:7-9;sub:8-9;nile:-;arid:-;trop:-;mon:-"],
+      ["peach", "fruit", "🍑", "Персик", "cool:7-8;cont:7-8;cold:-;south:7-8;med:6-8;sub:5-7;nile:5-6;arid:-;trop:-;mon:5-7"],
+      ["orange", "fruit", "🍊", "Апельсин", "cool:-;cont:-;cold:-;south:-;med:11-4=1-2;medMild:11-3=12-2;drymed:-;sub:11-3=12-2;nile:12-3;arid:-;trop:6-9;mon:11-2"],
+      ["lemon", "fruit", "🍋", "Лимон", "cool:-;cont:-;cold:-;south:-;med:10-3=12-2;drymed:-;sub:10-2;nile:11-3;arid:-;trop:1-12=6-9;mon:11-2"],
+      ["banana", "fruit", "🍌", "Банан", "cool:-;cont:-;med:-;cold:-;sub:-;nile:3-6;arid:-;trop:1-12=1-12;mon:1-12=6-10;subtrop:1-12=5-9"],
+      ["watermelon", "fruit", "🍉", "Арбуз", "cool:8-8;cont:8-8;cold:-;south:7-8;med:6-8;sub:5-8;nile:5-7;arid:6-8;trop:3-6;mon:4-6"],
+      ["melon", "fruit", "🍈", "Дыня", "cool:8-8;cont:8-8;cold:-;south:7-8;med:6-8;sub:6-8;nile:5-7;arid:6-8;trop:3-5;mon:4-6"],
+      ["grape", "fruit", "🍇", "Виноград", "cool:9-10;cont:9-9;cold:-;south:8-9;med:8-10=9-9;sub:8-9;nile:6-8;arid:-;sahel:-;trop:-;mon:-"],
+      ["cherry", "fruit", "🍒", "Вишня", "cool:6-7;cont:7-7;cold:7-7;south:6-6;med:5-6;sub:-;nile:-;arid:-;trop:-;mon:-"],
+      ["pineapple", "fruit", "🍍", "Ананас", "cool:-;med:-;cont:-;sub:-;nile:-;arid:-;trop:1-12=4-7;mon:5-8;subtrop:5-8"],
+      ["mango", "fruit", "🥭", "Манго", "cool:-;med:-;cont:-;sub:-;nile:6-8;arid:-;trop:4-7=5-6;mon:5-7;subtrop:5-7;sahel:4-6"],
+      ["kiwi", "fruit", "🥝", "Киви", "cool:10-11;cont:10-10;cold:-;south:-;med:10-12;medMild:10-11;sub:10-11;trop:-;mon:-;arid:-"],
+      ["coconut", "fruit", "🥥", "Кокос", "cool:-;med:-;cont:-;sub:-;mon:-;nile:-;arid:-;trop:1-12=1-12;subtrop:1-12=5-8"],
+      ["olive", "fruit", "🫒", "Оливки", "cool:-;cont:-;cold:-;south:-;med:10-12=11-11;medMild:10-12;drymed:-;sub:-;nile:-;arid:10-11;sahel:-;trop:-;mon:-"],
+      ["mandarin", "fruit", "🍊", "Мандарин", "cool:-;cont:-;cold:-;south:-;med:11-2=12-1;drymed:-;sub:11-1=12-12;nile:12-2;trop:10-1;mon:11-1;tempAsia:11-1=12-12"],
+      ["lime", "fruit", "🍋", "Лайм", "cool:-;cont:-;cold:-;med:9-11;sub:-;nile:7-9;arid:-;trop:1-12=5-8;mon:6-9;subtrop:6-9"],
+
+      ["strawberry", "berry", "🍓", "Клубника", "cool:6-7;cont:6-7;cold:7-7;south:5-6;med:4-6;sub:1-4=2-3;nile:12-3=1-2;arid:1-3;trop:6-8;mon:1-3"],
+      ["bilberry", "berry", "🫐", "Черника", "cool:7-8;cont:7-8;cold:8-8;south:-;med:-;sub:-;trop:-;mon:-;arid:-;nile:-"],
+      ["currant", "berry", "🍇", "Смородина", "cool:7-7;cont:7-8;cold:8-8;south:6-7;med:-;sub:-;trop:-;mon:-;arid:-"],
+      ["sweetcherry", "berry", "🍒", "Черешня", "cool:6-7;cont:6-7;cold:-;south:6-6;med:5-6;sub:5-6;trop:-;mon:-;arid:-;nile:-"],
+      ["blueberry", "berry", "🫐", "Голубика", "cool:7-8;cont:7-8;cold:8-8;south:6-7;med:-;sub:5-6;trop:-;mon:-;arid:-"],
+      ["raspberry", "berry", "🍓", "Малина", "cool:7-8;cont:7-8;cold:8-8;south:6-7;med:6-7;sub:-;trop:-;mon:-;arid:-"],
+      ["blackberry", "berry", "🫐", "Ежевика", "cool:8-9;cont:8-8;cold:8-8;south:7-8;med:6-7;sub:-;trop:-;mon:-;arid:-"],
+      ["gooseberry", "berry", "🍇", "Крыжовник", "cool:7-7;cont:7-7;cold:8-8;south:6-7;med:-;sub:-;trop:-;mon:-;arid:-"],
+      ["sourcherry", "berry", "🍒", "Вишня", "cool:6-7;cont:7-7;cold:7-7;south:6-6;med:5-6;sub:-;trop:-;mon:-;arid:-;nile:-"],
+      ["lingonberry", "berry", "🫐", "Брусника", "cool:8-9;cont:8-9;cold:8-9;south:-;med:-;sub:-;trop:-;mon:-;arid:-;tempAsia:-"],
+      ["wildstrawberry", "berry", "🍓", "Земляника", "cool:6-6;cont:6-7;cold:7-7;south:5-6;med:-;sub:-;trop:-;mon:-;arid:-"]
+    ];
+
+    function parseSeasons(spec) {
+      const map = {};
+      spec.split(";").forEach((part) => {
+        const splitAt = part.indexOf(":");
+        const climates = part.slice(0, splitAt);
+        const ranges = part.slice(splitAt + 1).trim();
+        climates.split(",").forEach((raw) => {
+          const key = raw.trim();
+          if (!key) return;
+          if (ranges === "-") {
+            map[key] = null;
+            return;
+          }
+          map[key] = ranges.split(",").map((range) => {
+            const [span, peak] = range.split("=");
+            const [start, end] = span.split("-").map(Number);
+            const window = { start, end };
+            if (peak) {
+              const [peakStart, peakEnd] = peak.split("-").map(Number);
+              window.peakStart = peakStart;
+              window.peakEnd = peakEnd;
+            }
+            return window;
+          });
+        });
+      });
+      return map;
+    }
+
+    const CROPS = CROP_ROWS.map(([id, category, emoji, name, spec]) => ({
+      id, category, emoji, name, seasons: parseSeasons(spec)
+    }));
+
+    const nowMonth = new Date().getMonth() + 1;
+    const state = loadState();
+
+    const regionList = document.getElementById("regionList");
+    const countrySelect = document.getElementById("countrySelect");
+    const zoneSelect = document.getElementById("zoneSelect");
+    const zoneField = document.getElementById("zoneField");
+    const monthList = document.getElementById("monthList");
+    const home = document.getElementById("home");
+    const results = document.getElementById("results");
+    const resultBody = document.getElementById("resultBody");
+
+    function loadState() {
+      const fresh = {
+        region: "europe",
+        country: "ru",
+        zone: "eu",
+        month: nowMonth,
+        theme: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light",
+        query: "",
+        category: "all",
+        lang: "ru"
+      };
+      try {
+        const saved = JSON.parse(localStorage.getItem("agrosezon") || "null");
+        if (!saved) return fresh;
+        const next = { ...fresh, ...saved, query: "" };
+        if (next.lang !== "en" && next.lang !== "ru") next.lang = "ru";
+        return next;
+      } catch (error) {
+        return fresh;
+      }
+    }
+
+    function saveState() {
+      const { query, ...rest } = state;
+      try { localStorage.setItem("agrosezon", JSON.stringify(rest)); } catch (error) { /* частный режим */ }
+    }
+
+    function copy() {
+      return COPY[state.lang];
+    }
+
+    function regionLabel(region) {
+      return state.lang === "en" ? EN.regions[region.id] : region.name;
+    }
+
+    function countryLabel(country) {
+      return state.lang === "en" ? EN.countries[country.id] : country.name;
+    }
+
+    function zoneLabel(country, zone) {
+      return state.lang === "en" ? EN.zones[`${country.id}.${zone.id}`] : zone.name;
+    }
+
+    function cropLabel(crop) {
+      return state.lang === "en" ? EN.crops[crop.id] : crop.name;
+    }
+
+    function regionById(id) {
+      return REGIONS.find((region) => region.id === id) || REGIONS[0];
+    }
+
+    function countryById(region, id) {
+      return region.countries.find((country) => country.id === id) || region.countries[0];
+    }
+
+    function currentPlace() {
+      const region = regionById(state.region);
+      const country = countryById(region, state.country);
+      const zone = country.zones ? (country.zones.find((item) => item.id === state.zone) || country.zones[0]) : null;
+      return { region, country, zone, climate: zone ? zone.climate : country.climate };
+    }
+
+    function seasonMonths(start, end) {
+      const months = [];
+      let month = start;
+      for (let guard = 0; guard < 12; guard += 1) {
+        months.push(month);
+        if (month === end) break;
+        month = month === 12 ? 1 : month + 1;
+      }
+      return months;
+    }
+
+    function classify(index, length) {
+      if (length === 1) return "peak";
+      if (length === 2) return index === 0 ? "start" : "end";
+      const shoulder = length >= 6 ? 2 : 1;
+      if (index < shoulder) return "start";
+      if (index >= length - shoulder) return "end";
+      return "peak";
+    }
+
+    function windowsFor(crop, climate) {
+      let key = climate;
+      const seen = new Set();
+      while (key && !seen.has(key)) {
+        seen.add(key);
+        if (Object.prototype.hasOwnProperty.call(crop.seasons, key)) return crop.seasons[key];
+        key = FALLBACK[key] || null;
+      }
+      return null;
+    }
+
+    function statusFor(month, windows) {
+      if (!windows) return null;
+      for (const window of windows) {
+        const months = seasonMonths(window.start, window.end);
+        const index = months.indexOf(month);
+        if (index === -1) continue;
+        if (window.peakStart) {
+          const peak = seasonMonths(window.peakStart, window.peakEnd);
+          if (peak.includes(month)) return "peak";
+          const peakIndex = months.indexOf(peak[0]);
+          return index < peakIndex ? "start" : "end";
+        }
+        return classify(index, months.length);
+      }
+      return null;
+    }
+
+    function productsFor(climate, month) {
+      return CROPS.reduce((list, crop) => {
+        const status = statusFor(month, windowsFor(crop, climate));
+        if (status) list.push({ ...crop, status });
+        return list;
+      }, []);
+    }
+
+    function applyTheme() {
+      document.documentElement.dataset.theme = state.theme;
+      document.getElementById("themeToggle").textContent = state.theme === "dark" ? copy().themeToLight : copy().themeToDark;
+      document.querySelector('meta[name="theme-color"]').content = state.theme === "dark" ? "#101712" : "#1B5E20";
+    }
+
+    function applyLanguage() {
+      const text = copy();
+      document.documentElement.lang = state.lang;
+      document.getElementById("tagline").textContent = text.tagline;
+      document.getElementById("labelRegion").textContent = text.region;
+      document.getElementById("labelCountry").textContent = text.country;
+      document.getElementById("labelZone").textContent = text.zone;
+      document.getElementById("labelMonth").textContent = text.month;
+      document.getElementById("showSeason").textContent = text.show;
+      document.getElementById("seasonNote").textContent = text.note;
+      document.getElementById("backBtn").textContent = text.back;
+      document.getElementById("prevMonth").setAttribute("aria-label", text.prev);
+      document.getElementById("nextMonth").setAttribute("aria-label", text.next);
+      document.getElementById("search").placeholder = text.search;
+      document.getElementById("copyright").textContent = text.copyright;
+      document.querySelector('meta[name="description"]').content = text.meta;
+      document.getElementById("langRu").classList.toggle("is-on", state.lang === "ru");
+      document.getElementById("langEn").classList.toggle("is-on", state.lang === "en");
+      document.getElementById("langRu").setAttribute("aria-pressed", String(state.lang === "ru"));
+      document.getElementById("langEn").setAttribute("aria-pressed", String(state.lang === "en"));
+      applyTheme();
+      renderRegions();
+      renderCountries();
+      renderMonths();
+      renderCats();
+      if (results.classList.contains("is-active")) renderResults();
+      else document.title = text.docTitle;
+    }
+
+    function renderRegions() {
+      regionList.innerHTML = REGIONS.map((region) => `
+        <button class="region-card${region.id === state.region ? " is-on" : ""}" type="button" data-region="${region.id}">
+          <strong>${regionLabel(region)}</strong>
+          <small>${region.countries.length} ${copy().places}</small>
+        </button>
+      `).join("");
+    }
+
+    function renderCountries() {
+      const region = regionById(state.region);
+      if (!region.countries.some((country) => country.id === state.country)) {
+        state.country = region.countries[0].id;
+        state.zone = region.countries[0].zones ? region.countries[0].zones[0].id : null;
+      }
+      countrySelect.innerHTML = region.countries.map((country) => `<option value="${country.id}">${countryLabel(country)}</option>`).join("");
+      countrySelect.value = state.country;
+      renderZones();
+    }
+
+    function renderZones() {
+      const place = currentPlace();
+      if (!place.country.zones) {
+        zoneField.hidden = true;
+        state.zone = null;
+        return;
+      }
+      zoneField.hidden = false;
+      if (!place.country.zones.some((zone) => zone.id === state.zone)) state.zone = place.country.zones[0].id;
+      zoneSelect.innerHTML = place.country.zones.map((zone) => `<option value="${zone.id}">${zoneLabel(place.country, zone)}</option>`).join("");
+      zoneSelect.value = state.zone;
+    }
+
+    function renderMonths() {
+      monthList.innerHTML = copy().months.map((name, index) => {
+        const month = index + 1;
+        const current = month === nowMonth ? `<span class="now">${copy().now}</span>` : "";
+        return `<button class="chip${month === state.month ? " is-on" : ""}" type="button" data-month="${month}">${current}${name}</button>`;
+      }).join("");
+      const active = monthList.querySelector(".is-on");
+      if (active) monthList.scrollLeft = Math.max(0, active.offsetLeft - 18);
+    }
+
+    function renderCats() {
+      document.getElementById("catList").innerHTML = CATEGORY_IDS.map((id) => `
+        <button class="cat${id === state.category ? " is-on" : ""}" type="button" data-cat="${id}" aria-pressed="${id === state.category}">${copy().categories[id]}</button>
+      `).join("");
+    }
+
+    function show(view) {
+      home.classList.toggle("is-active", view === "home");
+      results.classList.toggle("is-active", view === "results");
+    }
+
+    function renderResults() {
+      const place = currentPlace();
+      const text = copy();
+      const monthName = text.months[state.month - 1];
+      document.getElementById("resultsTitle").textContent = monthName;
+      const where = place.zone ? `${zoneLabel(place.country, place.zone)}, ${countryLabel(place.country)}` : countryLabel(place.country);
+      document.getElementById("placeLabel").textContent = `${where} · ${regionLabel(place.region)}`;
+      document.title = `AgroSezon — ${monthName} · ${where}`;
+
+      const query = state.query.toLowerCase().replace(/ё/g, "е");
+      const rank = { peak: 0, start: 1, end: 2 };
+      let items = productsFor(place.climate, state.month).filter((item) => {
+        const ruName = item.name.toLowerCase().replace(/ё/g, "е");
+        const enName = EN.crops[item.id].toLowerCase();
+        const categoryOk = state.category === "all" || item.category === state.category;
+        return categoryOk && (!query || ruName.includes(query) || enName.includes(query));
+      });
+      items.sort((a, b) => rank[a.status] - rank[b.status] || cropLabel(a).localeCompare(cropLabel(b), state.lang));
+
+      document.getElementById("resultCount").textContent = items.length
+        ? `${text.inSeason}: ${items.length}`
+        : "";
+
+      if (!items.length) {
+        resultBody.innerHTML = `
+          <div class="empty">
+            <strong>${text.emptyTitle}</strong>
+            <p class="note">${text.emptyText}</p>
+          </div>`;
+        return;
+      }
+
+      const groups = CATEGORY_IDS.filter((id) => id !== "all");
+      resultBody.innerHTML = groups.map((id) => {
+        const rows = items.filter((item) => item.category === id);
+        if (!rows.length) return "";
+        return `
+          <section class="group" data-cat="${id}">
+            <h3>${text.categories[id]}</h3>
+            ${rows.map((item) => `
+              <article class="product">
+                <div class="emoji" aria-hidden="true">${item.emoji}</div>
+                <div>
+                  <h4>${cropLabel(item)}</h4>
+                  <span class="status ${item.status}">${text.status[item.status]}</span>
+                </div>
+              </article>
+            `).join("")}
+          </section>`;
+      }).join("");
+    }
+
+    regionList.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-region]");
+      if (!button) return;
+      state.region = button.dataset.region;
+      state.country = regionById(state.region).countries[0].id;
+      renderRegions();
+      renderCountries();
+      saveState();
+    });
+
+    countrySelect.addEventListener("change", () => {
+      state.country = countrySelect.value;
+      state.zone = null;
+      renderZones();
+      saveState();
+    });
+
+    zoneSelect.addEventListener("change", () => {
+      state.zone = zoneSelect.value;
+      saveState();
+    });
+
+    monthList.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-month]");
+      if (!button) return;
+      state.month = Number(button.dataset.month);
+      renderMonths();
+      saveState();
+    });
+
+    document.getElementById("showSeason").addEventListener("click", () => {
+      saveState();
+      renderCats();
+      renderResults();
+      show("results");
+      document.getElementById("resultsTitle").focus();
+    });
+
+    document.getElementById("backBtn").addEventListener("click", () => {
+      show("home");
+      renderMonths();
+    });
+
+    function shiftMonth(step) {
+      state.month += step;
+      if (state.month < 1) state.month = 12;
+      if (state.month > 12) state.month = 1;
+      saveState();
+      renderResults();
+    }
+
+    document.getElementById("prevMonth").addEventListener("click", () => shiftMonth(-1));
+    document.getElementById("nextMonth").addEventListener("click", () => shiftMonth(1));
+
+    document.getElementById("search").addEventListener("input", (event) => {
+      state.query = event.target.value;
+      renderResults();
+    });
+
+    document.getElementById("catList").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-cat]");
+      if (!button) return;
+      state.category = button.dataset.cat;
+      renderCats();
+      renderResults();
+    });
+
+    document.getElementById("themeToggle").addEventListener("click", () => {
+      state.theme = state.theme === "dark" ? "light" : "dark";
+      applyTheme();
+      saveState();
+    });
+
+    document.getElementById("langSwitch").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-set-lang]");
+      if (!button || button.dataset.setLang === state.lang) return;
+      state.lang = button.dataset.setLang;
+      saveState();
+      applyLanguage();
+    });
+
+    /* Короткая проверка: январский апельсин на юге Европы есть, томат в сибирском январе — нет. */
+    function selfCheck() {
+      const orange = CROPS.find((crop) => crop.id === "orange");
+      const tomato = CROPS.find((crop) => crop.id === "tomato");
+      if (!statusFor(1, windowsFor(orange, "med"))) console.warn("AgroSezon: нет зимнего апельсина");
+      if (statusFor(1, windowsFor(tomato, "cold"))) console.warn("AgroSezon: томат попал в сибирский январь");
+      REGIONS.forEach((region) => {
+        if (!EN.regions[region.id]) console.warn("AgroSezon: нет перевода региона", region.id);
+        region.countries.forEach((country) => {
+          if (!EN.countries[country.id]) console.warn("AgroSezon: нет перевода страны", country.id);
+          (country.zones || []).forEach((zone) => {
+            if (!EN.zones[`${country.id}.${zone.id}`]) console.warn("AgroSezon: нет перевода зоны", country.id, zone.id);
+          });
+        });
+      });
+      CROPS.forEach((crop) => {
+        if (!EN.crops[crop.id]) console.warn("AgroSezon: нет перевода культуры", crop.id);
+      });
+    }
+
+    applyLanguage();
+    selfCheck();
+  </script>
+</body>
+</html>
