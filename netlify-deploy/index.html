@@ -1,17 +1,36 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-        <!-- Настройки для поиска Google и безопасности от Клода -->
-        <title>Дмитрий Эполетов — Фронтенд-разработчик | Санкт-Петербург</title>
-        <meta name="description" content="Сайт-визитка начинающего веб-разработчика Дмитрия Эполетова из Санкт-Петербурга. Навыки: HTML, CSS, JavaScript, Git. Открыт к первым проектам.">
-        <meta http-equiv="X-Content-Type-Options" content="nosniff">
-        <meta name="referrer" content="strict-origin-when-cross-origin">
-        <!-- <meta name="google-site-verification" content="КОД_ИЗ_SEARCH_CONSOLE" /> -->
-    
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; frame-src 'self'; img-src 'self' data: blob:; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline'; connect-src 'self'; upgrade-insecure-requests">
-  
+  <title>Дмитрий Эполетов — Фронтенд-разработчик | Санкт-Петербург</title>
+  <meta name="description" content="Сайт-визитка начинающего веб-разработчика Дмитрия Эполетова из Санкт-Петербурга. Навыки: HTML, CSS, JavaScript, Git. Открыт к первым проектам.">
+
+  <!-- Безопасность: CSP совместим с inline CSS/JS, Google Fonts и локальными iframe прототипов -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    base-uri 'self';
+    object-src 'none';
+    frame-ancestors 'self';
+    form-action 'self';
+    frame-src 'self';
+    img-src 'self' data: blob:;
+    font-src 'self' https://fonts.gstatic.com data:;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    script-src 'self' 'unsafe-inline';
+    script-src-attr 'none';
+    connect-src 'self';
+    media-src 'none';
+    worker-src 'none';
+    manifest-src 'self';
+    upgrade-insecure-requests
+  ">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()">
+  <meta name="robots" content="index, follow">
+  <!-- <meta name="google-site-verification" content="КОД_ИЗ_SEARCH_CONSOLE" /> -->
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
@@ -605,6 +624,7 @@
                   title="Groomly — интерактивный прототип"
                   allow="fullscreen"
                   loading="eager"
+                  referrerpolicy="strict-origin-when-cross-origin"
                 ></iframe>
               </div>
             </div>
@@ -625,6 +645,7 @@
                   title="AgroSezon — интерактивный прототип"
                   allow="fullscreen"
                   loading="eager"
+                  referrerpolicy="strict-origin-when-cross-origin"
                 ></iframe>
               </div>
             </div>
@@ -643,44 +664,93 @@
 
     <footer>
       <span>Санкт-Петербург · удалённо</span> ·
-      <!-- Контейнер, куда скрипт безопасно подставит почту -->
-      <span id="email-secure-container"></span>
+      <!-- Почта собирается только в JS; в HTML нет mailto и цельного адреса -->
+      <span id="email-secure-container" data-u="ZG1pdHJpc3h4eA==" data-d="Z21haWwuY29t" aria-label="Электронная почта"></span>
     </footer>
   </main>
-    
-    <!-- Скрипт защиты почты от спам-ботов и плавного скролла -->
-<!-- Скрипт защиты почты, плавного скролла и переключения тем -->
-<!-- Скрипт: защита почты, плавный скролл и переключение тем -->
+
   <script>
     (() => {
-      // Почта и навигация портфолио
-      const email = "dmitrisxxx" + "@" + "gmail.com";
-      const emailNode = document.getElementById("email-secure-container");
-      if (emailNode) {
-        emailNode.textContent = "";
+      // ——— Почта: Base64 + сборка только в рантайме (против простых парсеров HTML) ———
+      const emailBox = document.getElementById("email-secure-container");
+      const decodePart = (b64) => {
+        try { return atob(b64); } catch (_) { return ""; }
+      };
+      const buildEmail = () => {
+        if (!emailBox) return "";
+        const user = decodePart(emailBox.getAttribute("data-u") || "");
+        const domain = decodePart(emailBox.getAttribute("data-d") || "");
+        if (!user || !domain) return "";
+        return user + String.fromCharCode(64) + domain;
+      };
+
+      const revealEmail = () => {
+        const email = buildEmail();
+        if (!emailBox || !email || emailBox.dataset.ready === "1") return email;
+        emailBox.textContent = "";
         const link = document.createElement("a");
         link.href = "mailto:" + email;
         link.textContent = email;
-        emailNode.appendChild(link);
-      }
-      document.getElementById("secure-write-btn")?.addEventListener("click", e => {
-        e.preventDefault(); window.location.href = `mailto:${email}`;
+        link.rel = "noopener noreferrer";
+        emailBox.appendChild(link);
+        emailBox.dataset.ready = "1";
+        return email;
+      };
+
+      // Показ после жеста пользователя или короткой задержки (ботам без JS — пусто)
+      const armEmail = () => { revealEmail(); };
+      ["pointerdown", "keydown", "scroll"].forEach((evt) => {
+        window.addEventListener(evt, armEmail, { once: true, passive: true });
       });
-      document.getElementById("view-skills-btn")?.addEventListener("click", e => {
-        e.preventDefault(); document.getElementById("skills").scrollIntoView({behavior:"smooth"});
+      setTimeout(armEmail, 1200);
+
+      document.getElementById("secure-write-btn")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        const email = revealEmail() || buildEmail();
+        if (email) window.location.href = "mailto:" + email;
       });
+
+      document.getElementById("view-skills-btn")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        document.getElementById("skills")?.scrollIntoView({ behavior: "smooth" });
+      });
+
+      // Внешние ссылки: всегда rel="noopener noreferrer" (tabnabbing / referrer)
+      const hardenExternalLinks = (root = document) => {
+        root.querySelectorAll("a[href]").forEach((a) => {
+          const href = a.getAttribute("href") || "";
+          if (!/^https?:\/\//i.test(href)) return;
+          try {
+            const url = new URL(href, window.location.href);
+            if (url.origin === window.location.origin) return;
+          } catch (_) {
+            return;
+          }
+          const rel = new Set((a.getAttribute("rel") || "").split(/\s+/).filter(Boolean));
+          rel.add("noopener");
+          rel.add("noreferrer");
+          a.setAttribute("rel", [...rel].join(" "));
+        });
+      };
+      hardenExternalLinks();
 
       // Переключение темы сайта
       const themeButton = document.getElementById("theme-toggle");
       const savedTheme = localStorage.getItem("theme") || "dark";
-      const setTheme = theme => {
-        if (theme === "light") document.documentElement.setAttribute("data-theme","light");
+      const setTheme = (theme) => {
+        if (theme === "light") document.documentElement.setAttribute("data-theme", "light");
         else document.documentElement.removeAttribute("data-theme");
-        localStorage.setItem("theme",theme);
-        themeButton.textContent = theme === "light" ? "🌙 Тёмная тема" : "☀️ Светлая тема";
+        localStorage.setItem("theme", theme);
+        if (themeButton) {
+          themeButton.textContent = theme === "light" ? "🌙 Тёмная тема" : "☀️ Светлая тема";
+        }
       };
       setTheme(savedTheme);
-      themeButton.addEventListener("click", () => setTheme(document.documentElement.getAttribute("data-theme")==="light"?"dark":"light"));
+      themeButton?.addEventListener("click", () => {
+        const next =
+          document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+        setTheme(next);
+      });
     })();
   </script>
   <style>

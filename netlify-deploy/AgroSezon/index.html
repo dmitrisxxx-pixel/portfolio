@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AgroSezon — сезонный календарь</title>
   <meta name="description" content="AgroSezon показывает, какие овощи, зелень, фрукты и ягоды собирают в выбранной стране и климатической зоне в конкретный месяц.">
-  <meta name="theme-color" content="#1B5E20">
+  <meta name="theme-color" content="#100c1c">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline'; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; upgrade-insecure-requests">
@@ -15,44 +15,49 @@
   <meta name="apple-mobile-web-app-title" content="AgroSezon">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,620;7..72,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
   <style>
-    /* Природный минимализм: зелень + терракота, светлая и тёмная темы. */
-    :root {
-      --bg-outer: #dce6d6;
-      --bg: #f5f3ee;
-      --card: #ffffff;
-      --text: #1c2a22;
-      --muted: #5d6e64;
-      --line: #e3e6dc;
-      --green: #1b5e20;
-      --green-deep: #1b5e20;
-      --green-soft: #e6f3e6;
-      --terra: #c45c3e;
-      --terra-soft: #f8e8e1;
-      --berry: #8d3d55;
-      --shadow: 0 12px 32px rgba(36, 58, 40, 0.08);
-      --radius: 16px;
+    /* Тёмная база как у визитки; светлая — через data-theme="light". */
+    :root,
+    [data-theme="dark"] {
+      --bg-outer: #0a0814;
+      --bg: #100c1c;
+      --bg-soft: #1a1430;
+      --card: rgba(28, 20, 52, 0.74);
+      --text: #f4f0ff;
+      --muted: #b7aec9;
+      --line: rgba(196, 181, 253, 0.18);
+      --green: #c4b5fd;
+      --green-deep: #0e8f7a;
+      --green-soft: rgba(14, 143, 122, 0.2);
+      --terra: #c4b5fd;
+      --terra-soft: rgba(196, 181, 253, 0.16);
+      --berry: #e9d5ff;
+      --btn-text: #ffffff;
+      --shadow: 0 24px 60px rgba(8, 4, 24, 0.4);
+      --radius: 22px;
       --font: "Manrope", "Segoe UI", sans-serif;
-      --display: "Literata", Georgia, serif;
-      color-scheme: light;
+      --display: "Unbounded", "Manrope", sans-serif;
+      color-scheme: dark;
     }
 
-    [data-theme="dark"] {
-      --bg-outer: #070c09;
-      --bg: #101712;
-      --card: #1a2420;
-      --text: #e8f3ec;
-      --muted: #a9bdb1;
-      --line: #2c3b33;
-      --green: #8dcea0;
-      --green-deep: #2e7d32;
-      --green-soft: #1b3324;
-      --terra: #f0a58a;
-      --terra-soft: #3a2722;
-      --berry: #f0b3c3;
-      --shadow: 0 14px 34px rgba(0, 0, 0, 0.32);
-      color-scheme: dark;
+    [data-theme="light"] {
+      --bg-outer: #e8e2f5;
+      --bg: #f4f0ff;
+      --bg-soft: #e8e2f5;
+      --card: rgba(255, 255, 255, 0.88);
+      --text: #100c1c;
+      --muted: #5a5266;
+      --line: rgba(16, 12, 28, 0.1);
+      --green: #0e8f7a;
+      --green-deep: #0c7c6a;
+      --green-soft: rgba(12, 124, 106, 0.16);
+      --terra: #8b5cf6;
+      --terra-soft: rgba(196, 181, 253, 0.28);
+      --berry: #a78bfa;
+      --btn-text: #ffffff;
+      --shadow: 0 24px 48px rgba(16, 12, 28, 0.08);
+      color-scheme: light;
     }
 
     * { box-sizing: border-box; }
@@ -64,8 +69,31 @@
       font-family: var(--font);
       color: var(--text);
       background:
-        radial-gradient(900px 420px at 10% -10%, rgba(46, 125, 50, 0.16), transparent 60%),
-        var(--bg-outer);
+        radial-gradient(900px 500px at 8% -10%, rgba(139, 92, 246, 0.22), transparent 60%),
+        radial-gradient(700px 480px at 100% 0%, rgba(14, 143, 122, 0.12), transparent 55%),
+        linear-gradient(180deg, #1a1233 0%, var(--bg) 48%, #0a0814 100%);
+    }
+
+    [data-theme="light"] body {
+      background:
+        radial-gradient(900px 500px at 8% -10%, rgba(139, 92, 246, 0.22), transparent 60%),
+        radial-gradient(700px 480px at 100% 0%, rgba(14, 143, 122, 0.14), transparent 55%),
+        linear-gradient(180deg, var(--bg-soft) 0%, var(--bg-outer) 48%, var(--bg) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.045) 0.6px, transparent 0.6px);
+      background-size: 3px 3px;
+      opacity: 0.55;
+      z-index: 0;
+    }
+
+    [data-theme="light"] body::before {
+      background-image: radial-gradient(rgba(16, 12, 28, 0.045) 0.6px, transparent 0.6px);
     }
 
     button, input, select { font: inherit; color: inherit; }
@@ -73,11 +101,18 @@
     button { cursor: pointer; }
 
     .app {
+      position: relative;
+      z-index: 1;
       width: min(480px, 100%);
       min-height: 100vh;
       min-height: 100dvh;
       margin: 0 auto;
-      padding: 22px 18px 36px;
+      padding: 26px 20px 40px;
+      background: rgba(16, 12, 28, 0.88);
+      backdrop-filter: blur(10px);
+    }
+
+    [data-theme="light"] .app {
       background: var(--bg);
     }
 
@@ -105,10 +140,11 @@
     }
 
     @media (min-width: 760px) {
-      body { padding: 28px 16px; }
+      body { padding: 32px 16px; }
       .app {
-        min-height: calc(100vh - 56px);
-        border-radius: 28px;
+        min-height: calc(100vh - 64px);
+        border-radius: 32px;
+        border: 1px solid var(--line);
         box-shadow: var(--shadow);
       }
     }
@@ -165,22 +201,24 @@
     }
 
     .mark {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
       display: grid;
       place-items: center;
       background: var(--green-deep);
-      color: #fff;
+      color: var(--btn-text);
       flex: none;
+      box-shadow: 0 0 0 6px rgba(14, 143, 122, 0.18);
     }
 
     h1 {
       margin: 0;
       font-family: var(--display);
-      font-size: 28px;
+      font-size: 26px;
       letter-spacing: -0.03em;
-      line-height: 1;
+      line-height: 1.1;
+      font-weight: 700;
     }
 
     .tagline {
@@ -230,7 +268,7 @@
 
     .lang button.is-on {
       background: var(--green-deep);
-      color: #fff;
+      color: var(--btn-text);
     }
 
     .legal {
@@ -249,10 +287,11 @@
     }
 
     h2 {
-      margin: 0 0 12px;
+      margin: 0 0 14px;
       font-family: var(--display);
       font-size: 22px;
       letter-spacing: -0.03em;
+      font-weight: 700;
     }
 
     .field { margin: 16px 0; }
@@ -270,17 +309,17 @@
     select, .search {
       width: 100%;
       min-height: 52px;
-      border-radius: 14px;
+      border-radius: 18px;
       border: 1px solid var(--line);
       background: var(--card);
-      padding: 0 14px;
+      padding: 0 16px;
       outline: none;
       transition: border-color 180ms ease, box-shadow 180ms ease;
     }
 
     select:focus, .search:focus {
       border-color: var(--green-deep);
-      box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.15);
+      box-shadow: 0 0 0 4px rgba(14, 143, 122, 0.22);
     }
 
     .region-list, .months, .cats {
@@ -313,8 +352,9 @@
       border: 1px solid var(--line);
       background: var(--card);
       border-radius: var(--radius);
-      padding: 14px 16px;
+      padding: 16px 18px;
       box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
     }
 
     .region-card small {
@@ -328,18 +368,18 @@
 
     .region-card.is-on, .chip.is-on, .cat.is-on {
       background: var(--green-deep);
-      color: #fff;
+      color: var(--btn-text);
       border-color: var(--green-deep);
     }
 
-    .region-card.is-on small { color: rgba(255, 255, 255, 0.8); }
+    .region-card.is-on small { color: rgba(255, 255, 255, 0.78); }
 
     .chip, .cat {
       border: 1px solid var(--line);
       background: var(--card);
-      border-radius: 14px;
+      border-radius: 999px;
       min-height: 48px;
-      padding: 0 14px;
+      padding: 0 16px;
       flex: none;
       font-weight: 700;
     }
@@ -359,14 +399,19 @@
 
     .primary {
       width: 100%;
-      min-height: 54px;
+      min-height: 56px;
       border: 0;
-      border-radius: 16px;
+      border-radius: 999px;
       background: var(--green-deep);
-      color: #fff;
+      color: var(--btn-text);
       font-weight: 700;
       font-size: 16px;
       box-shadow: var(--shadow);
+      letter-spacing: 0.01em;
+    }
+
+    .primary:hover {
+      filter: brightness(1.05);
     }
 
     .note {
@@ -393,12 +438,12 @@
       margin: 6px 0 8px;
     }
 
-    .switch h2 { font-size: 32px; margin: 0; }
+    .switch h2 { font-size: 28px; margin: 0; }
 
     .icon-btn {
       width: 48px;
       height: 48px;
-      border-radius: 14px;
+      border-radius: 16px;
       border: 1px solid var(--line);
       background: var(--card);
       font-size: 22px;
@@ -421,19 +466,21 @@
 
     .product {
       display: flex;
-      gap: 12px;
+      gap: 14px;
       align-items: center;
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      padding: 12px;
-      margin-bottom: 8px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
     }
 
     .emoji {
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
       display: grid;
       place-items: center;
       font-size: 26px;
@@ -442,8 +489,8 @@
     }
 
     .group[data-cat="fruit"] .emoji { background: var(--terra-soft); }
-    .group[data-cat="berry"] .emoji { background: #f8e8ee; }
-    [data-theme="dark"] .group[data-cat="berry"] .emoji { background: #3a2430; }
+    .group[data-cat="berry"] .emoji { background: rgba(196, 181, 253, 0.16); }
+    [data-theme="light"] .group[data-cat="berry"] .emoji { background: rgba(167, 139, 250, 0.22); }
 
     .product h4 { margin: 0 0 4px; font-size: 16px; }
 
@@ -463,13 +510,25 @@
 
     .empty {
       margin-top: 24px;
-      padding: 22px 18px;
+      padding: 26px 20px;
       border-radius: var(--radius);
       background: var(--card);
       border: 1px dashed var(--line);
+      box-shadow: var(--shadow);
     }
 
-    .empty strong { display: block; font-family: var(--display); font-size: 22px; margin-bottom: 6px; }
+    .empty strong {
+      display: block;
+      font-family: var(--display);
+      font-size: 20px;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .back-to-site:hover,
+    .theme-btn:hover {
+      border-color: var(--green);
+    }
 
     .count { margin: 0 0 8px; font-weight: 700; }
 
@@ -928,7 +987,7 @@
         country: "ru",
         zone: "eu",
         month: nowMonth,
-        theme: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light",
+        theme: "dark",
         query: "",
         category: "all",
         lang: "ru"
@@ -1043,7 +1102,7 @@
     function applyTheme() {
       document.documentElement.dataset.theme = state.theme;
       document.getElementById("themeToggle").textContent = state.theme === "dark" ? copy().themeToLight : copy().themeToDark;
-      document.querySelector('meta[name="theme-color"]').content = state.theme === "dark" ? "#101712" : "#1B5E20";
+      document.querySelector('meta[name="theme-color"]').content = state.theme === "dark" ? "#100c1c" : "#f4f0ff";
     }
 
     function applyLanguage() {
