@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "provider": "fao_crop_calendar_local",
+    "format": "agroseason-fao-v1",
+    "note": "Local FAO-like sample. Replace loader with HTTP adapter later."
+  },
+  "sources": [
+    {
+      "id": "src_fao",
+      "code": "FAO_CROP_CALENDAR",
+      "nameRu": "FAO Crop Calendar (local JSON)",
+      "nameEn": "FAO Crop Calendar (local JSON)",
+      "url": "https://cropcalendar.apps.fao.org/",
+      "license": "FAO-inspired sample",
+      "notes": "Swap file/HTTP without changing models"
+    }
+  ],
+  "windows": [
+    {"id": "fao_wheat_eg_plant", "cropId": "crop_wheat", "regionId": "r_nile", "seasonType": "planting", "startMonth": 11, "peakMonth": 11, "endMonth": 12, "confidence": "medium"},
+    {"id": "fao_wheat_eg_harv", "cropId": "crop_wheat", "regionId": "r_nile", "seasonType": "harvest", "startMonth": 4, "peakMonth": 5, "endMonth": 5, "confidence": "medium"},
+    {"id": "fao_wheat_in_plant", "cropId": "crop_wheat", "regionId": "r_punjab_in", "seasonType": "planting", "startMonth": 10, "peakMonth": 11, "endMonth": 12, "confidence": "high"},
+    {"id": "fao_wheat_in_harv", "cropId": "crop_wheat", "regionId": "r_punjab_in", "seasonType": "harvest", "startMonth": 3, "peakMonth": 4, "endMonth": 5, "confidence": "high"},
+    {"id": "fao_rice_cn_plant", "cropId": "crop_rice", "regionId": "r_shandong", "seasonType": "planting", "startMonth": 4, "peakMonth": 5, "endMonth": 5, "confidence": "high"},
+    {"id": "fao_rice_cn_harv", "cropId": "crop_rice", "regionId": "r_shandong", "seasonType": "harvest", "startMonth": 9, "peakMonth": 10, "endMonth": 10, "confidence": "high"},
+    {"id": "fao_rice_in_plant", "cropId": "crop_rice", "regionId": "r_maharashtra", "seasonType": "planting", "startMonth": 6, "peakMonth": 6, "endMonth": 7, "confidence": "medium"},
+    {"id": "fao_rice_in_harv", "cropId": "crop_rice", "regionId": "r_maharashtra", "seasonType": "harvest", "startMonth": 10, "peakMonth": 11, "endMonth": 12, "confidence": "medium"},
+    {"id": "fao_maize_us_plant", "cropId": "crop_corn", "regionId": "r_midwest", "seasonType": "planting", "startMonth": 4, "peakMonth": 5, "endMonth": 5, "confidence": "verified"},
+    {"id": "fao_maize_us_harv", "cropId": "crop_corn", "regionId": "r_midwest", "seasonType": "harvest", "startMonth": 9, "peakMonth": 10, "endMonth": 11, "confidence": "verified"},
+    {"id": "fao_maize_br_harv", "cropId": "crop_corn", "regionId": "r_sao_paulo", "seasonType": "harvest", "startMonth": 1, "peakMonth": 2, "endMonth": 3, "confidence": "medium"},
+    {"id": "fao_soy_us_plant", "cropId": "crop_soy", "regionId": "r_midwest", "seasonType": "planting", "startMonth": 4, "peakMonth": 5, "endMonth": 5, "confidence": "verified"},
+    {"id": "fao_soy_us_harv", "cropId": "crop_soy", "regionId": "r_midwest", "seasonType": "harvest", "startMonth": 9, "peakMonth": 10, "endMonth": 10, "confidence": "verified"},
+    {"id": "fao_soy_br_harv", "cropId": "crop_soy", "regionId": "r_sao_paulo", "seasonType": "harvest", "startMonth": 1, "peakMonth": 2, "endMonth": 3, "confidence": "high"},
+    {"id": "fao_cotton_uz_plant", "cropId": "crop_cotton", "regionId": "r_samarkand", "seasonType": "planting", "startMonth": 4, "peakMonth": 4, "endMonth": 5, "confidence": "high"},
+    {"id": "fao_cotton_uz_harv", "cropId": "crop_cotton", "regionId": "r_samarkand", "seasonType": "harvest", "startMonth": 9, "peakMonth": 10, "endMonth": 11, "confidence": "high"},
+    {"id": "fao_tomato_tr_harv", "cropId": "crop_tomato", "regionId": "r_antalya", "seasonType": "harvest", "startMonth": 3, "peakMonth": 5, "endMonth": 7, "confidence": "medium", "incomplete": true},
+    {"id": "fao_potato_ru_plant", "cropId": "crop_potato", "regionId": "r_krasnodar", "seasonType": "planting", "startMonth": 3, "peakMonth": 4, "endMonth": 4, "confidence": "high"},
+    {"id": "fao_potato_ru_harv", "cropId": "crop_potato", "regionId": "r_krasnodar", "seasonType": "harvest", "startMonth": 7, "peakMonth": 8, "endMonth": 9, "confidence": "high"},
+    {"id": "fao_olive_es_harv", "cropId": "crop_olive", "regionId": "r_andulusia", "seasonType": "harvest", "startMonth": 10, "peakMonth": 11, "endMonth": 1, "confidence": "verified"},
+    {"id": "fao_grape_fr_harv", "cropId": "crop_grape", "regionId": "r_bordeaux", "seasonType": "harvest", "startMonth": 9, "peakMonth": 9, "endMonth": 10, "confidence": "verified"},
+    {"id": "fao_orange_es_harv", "cropId": "crop_orange", "regionId": "r_valencia", "seasonType": "harvest", "startMonth": 11, "peakMonth": 12, "endMonth": 3, "confidence": "high"},
+    {"id": "fao_coffee_br_harv", "cropId": "crop_coffee", "regionId": "r_minas", "seasonType": "harvest", "startMonth": 5, "peakMonth": 6, "endMonth": 8, "confidence": "verified"},
+    {"id": "fao_cocoa_ci_harv", "cropId": "crop_cocoa", "regionId": "r_abidjan", "seasonType": "harvest", "startMonth": 10, "peakMonth": 11, "endMonth": 1, "confidence": "high"},
+    {"id": "fao_sugarcane_br_harv", "cropId": "crop_sugarcane", "regionId": "r_sao_paulo", "seasonType": "harvest", "startMonth": 4, "peakMonth": 7, "endMonth": 11, "confidence": "verified"},
+    {"id": "fao_almond_us_harv", "cropId": "crop_almond", "regionId": "r_california", "seasonType": "harvest", "startMonth": 8, "peakMonth": 8, "endMonth": 9, "confidence": "verified"},
+    {"id": "fao_avocado_mx_harv", "cropId": "crop_avocado", "regionId": "r_michoacan", "seasonType": "harvest", "startMonth": 10, "peakMonth": 12, "endMonth": 3, "confidence": "verified"},
+    {"id": "fao_sunflower_ru_harv", "cropId": "crop_sunflower", "regionId": "r_krasnodar", "seasonType": "harvest", "startMonth": 8, "peakMonth": 9, "endMonth": 9, "confidence": "high"},
+    {"id": "fao_barley_tr_harv", "cropId": "crop_barley", "regionId": "r_izmir", "seasonType": "harvest", "startMonth": 5, "peakMonth": 6, "endMonth": 6, "confidence": "medium"},
+    {"id": "fao_chickpea_in_harv", "cropId": "crop_chickpea", "regionId": "r_maharashtra", "seasonType": "harvest", "startMonth": 2, "peakMonth": 3, "endMonth": 3, "confidence": "medium"}
+  ]
+}
